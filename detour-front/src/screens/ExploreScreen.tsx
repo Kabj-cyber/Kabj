@@ -105,7 +105,7 @@ export default function ExploreScreen({ navigation }: Props) {
 
   const regionChips = (
     <View style={styles.topSection}>
-      <Text style={styles.header}>Explore Map</Text>
+      <Text style={styles.header}>Explore</Text>
       <FlatList
         horizontal
         data={REGIONS}
@@ -143,30 +143,30 @@ export default function ExploreScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0F2E1F" },
+  container: { flex: 1, backgroundColor: colors.background },
   topSection: {
     backgroundColor: colors.background,
     paddingTop: 60,
     paddingBottom: 8,
   },
   header: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: "800",
     color: colors.text,
-    paddingHorizontal: 20,
-    marginBottom: 14,
+    paddingHorizontal: 16,
+    marginBottom: 16,
   },
-  chipsRow: { paddingHorizontal: 20, gap: 8, paddingBottom: 8 },
+  chipsRow: { paddingHorizontal: 16, gap: 8, paddingBottom: 12 },
   chip: {
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: 9,
     borderRadius: radius.pill,
     backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
     marginRight: 8,
   },
-  chipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+  chipActive: { backgroundColor: colors.text, borderColor: colors.text },
   chipText: { color: colors.textMuted, fontSize: 13, fontWeight: "600" },
   chipTextActive: { color: "#fff" },
 });

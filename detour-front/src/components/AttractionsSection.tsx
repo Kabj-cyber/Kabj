@@ -1,7 +1,6 @@
-import React, { ReactElement, useCallback, useMemo } from "react";
+import React, { ReactElement, useCallback } from "react";
 import {
   ActivityIndicator,
-  Dimensions,
   FlatList,
   ListRenderItem,
   StyleSheet,
@@ -9,14 +8,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import AttractionCard from "./AttractionCard";
+import AttractionListCard from "./AttractionListCard";
 import { Attraction } from "../types";
+import { colors } from "../theme";
 
-const SECTION_BG = "#0F2E1F";
-const GOLD = "#E8B830";
 const H_PADDING = 16;
-const GAP = 9;
-const NUM_COLUMNS = 3;
 
 interface Props {
   attractions: Attraction[];
@@ -39,21 +35,15 @@ export default function AttractionsSection({
   ListHeaderComponent,
   emptyMessage = "No attractions found.",
 }: Props) {
-  const cardWidth = useMemo(() => {
-    const screenWidth = Dimensions.get("window").width;
-    return (screenWidth - H_PADDING * 2 - GAP * (NUM_COLUMNS - 1)) / NUM_COLUMNS;
-  }, []);
-
   const renderItem: ListRenderItem<Attraction> = useCallback(
     ({ item }) => (
-      <AttractionCard
+      <AttractionListCard
         attraction={item}
-        width={cardWidth}
         onPress={() => onPressCard(item)}
         onToggleFavorite={onToggleFavorite}
       />
     ),
-    [cardWidth, onPressCard, onToggleFavorite]
+    [onPressCard, onToggleFavorite]
   );
 
   const sectionHeader = (
@@ -71,7 +61,7 @@ export default function AttractionsSection({
       <View style={styles.sectionWrap}>
         {sectionHeader}
         {loading ? (
-          <ActivityIndicator color={GOLD} style={styles.loader} />
+          <ActivityIndicator color={colors.primary} style={styles.loader} />
         ) : error ? (
           <Text style={styles.error}>{error}</Text>
         ) : null}
@@ -83,8 +73,6 @@ export default function AttractionsSection({
     <FlatList
       data={loading || error ? [] : attractions}
       keyExtractor={(item) => String(item.id)}
-      numColumns={NUM_COLUMNS}
-      columnWrapperStyle={styles.row}
       contentContainerStyle={styles.content}
       style={styles.list}
       ListHeaderComponent={listHeader}
@@ -102,46 +90,43 @@ export default function AttractionsSection({
 const styles = StyleSheet.create({
   list: {
     flex: 1,
-    backgroundColor: SECTION_BG,
+    backgroundColor: colors.background,
   },
   content: {
     paddingHorizontal: H_PADDING,
     paddingBottom: 24,
   },
   sectionWrap: {
-    backgroundColor: SECTION_BG,
-    paddingTop: 8,
+    backgroundColor: colors.background,
+    paddingTop: 4,
   },
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 12,
+    marginBottom: 14,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "700",
-    color: "#fff",
+    color: colors.text,
   },
   seeAll: {
     fontSize: 14,
     fontWeight: "600",
-    color: GOLD,
-  },
-  row: {
-    gap: GAP,
+    color: colors.primary,
   },
   loader: {
     marginVertical: 32,
   },
   error: {
-    color: "#fca5a5",
+    color: colors.danger,
     textAlign: "center",
     marginVertical: 24,
     paddingHorizontal: 8,
   },
   empty: {
-    color: "rgba(255,255,255,0.6)",
+    color: colors.textMuted,
     textAlign: "center",
     marginTop: 32,
     marginBottom: 16,

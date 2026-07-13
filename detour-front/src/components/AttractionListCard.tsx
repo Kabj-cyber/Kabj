@@ -1,5 +1,5 @@
-import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Attraction } from "../types";
 import { colors, radius } from "../theme";
@@ -7,30 +7,83 @@ import { colors, radius } from "../theme";
 interface Props {
   attraction: Attraction;
   onPress: () => void;
+  onToggleFavorite?: (id: number, favorited: boolean) => void;
 }
 
-export default function AttractionListCard({ attraction, onPress }: Props) {
+export default function AttractionListCard({
+  attraction,
+  onPress,
+  onToggleFavorite,
+}: Props) {
+  const [favorited, setFavorited] = useState(attraction.isFavorited ?? false);
+
+  useEffect(() => {
+    setFavorited(attraction.isFavorited ?? false);
+  }, [attraction.id, attraction.isFavorited]);
+
+  const rating =
+    attraction.averageRating != null
+      ? Number(attraction.averageRating).toFixed(1)
+      : null;
+  const reviewCount = attraction.reviewCount ?? 0;
+
+  const handleFavoritePress = () => {
+    const next = !favorited;
+    setFavorited(next);
+    onToggleFavorite?.(attraction.id, next);
+  };
+
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.85}>
-      <View style={styles.imagePlaceholder}>
-        <Ionicons name="image-outline" size={28} color={colors.textMuted} />
+    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.9}>
+      {/* Full-bleed image, no card border/box — Airbnb/Booking.com listing style */}
+      <View style={styles.imageWrap}>
+        <Image source={{ uri: attraction.imageUrl }} style={styles.image} resizeMode="cover" />
+        <TouchableOpacity
+          style={styles.heartButton}
+          onPress={handleFavoritePress}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          activeOpacity={0.8}
+        >
+          <Ionicons
+            name={favorited ? "heart" : "heart-outline"}
+            size={20}
+            color={favorited ? "#FF385C" : "#fff"}
+          />
+        </TouchableOpacity>
       </View>
+
       <View style={styles.info}>
-        <Text style={styles.title}>{attraction.title}</Text>
+        {/* Row 1: title + rating, like Airbnb's location/rating line */}
+        <View style={styles.titleRow}>
+          <Text style={styles.title} numberOfLines={1}>
+            {attraction.title}
+          </Text>
+          {rating && (
+            <View style={styles.ratingRow}>
+              <Ionicons name="star" size={13} color={colors.text} />
+              <Text style={styles.ratingText}>{rating}</Text>
+            </View>
+          )}
+        </View>
+
         <Text style={styles.subtitle} numberOfLines={1}>
           {attraction.category} · {attraction.region}
         </Text>
-        <View style={styles.row}>
-          {attraction.popularityCount != null && (
-            <View style={styles.badge}>
-              <Ionicons name="star" size={12} color={colors.accentDark} />
-              <Text style={styles.badgeText}>{attraction.popularityCount}</Text>
-            </View>
-          )}
-          {attraction.basePrice != null && (
-            <Text style={styles.price}>GHS {Number(attraction.basePrice).toFixed(0)}</Text>
-          )}
-        </View>
+
+        {reviewCount > 0 && (
+          <Text style={styles.reviews} numberOfLines={1}>
+            {reviewCount} review{reviewCount === 1 ? "" : "s"}
+          </Text>
+        )}
+
+        {attraction.basePrice != null && (
+          <Text style={styles.priceRow}>
+            <Text style={styles.priceAmount}>
+              GHS {Number(attraction.basePrice).toFixed(0)}
+            </Text>
+            <Text style={styles.pricePeriod}> / person</Text>
+          </Text>
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -38,24 +91,79 @@ export default function AttractionListCard({ attraction, onPress }: Props) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.card,
+    marginBottom: 32,
+  },
+  imageWrap: {
+    aspectRatio: 4 / 3,
+    width: "100%",
     borderRadius: radius.md,
     overflow: "hidden",
-    marginBottom: 14,
-    borderWidth: 1,
-    borderColor: colors.border,
+    position: "relative",
+    backgroundColor: colors.border,
   },
-  imagePlaceholder: {
-    height: 110,
-    backgroundColor: "#eceae3",
+  image: {
+    width: "100%",
+    height: "100%",
+  },
+  heartButton: {
+    position: "absolute",
+    top: 12,
+    right: 12,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.35,
+    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 1 },
   },
-  info: { padding: 12 },
-  title: { fontSize: 15, fontWeight: "700", color: colors.text, marginBottom: 2 },
-  subtitle: { fontSize: 12, color: colors.textMuted, marginBottom: 8 },
-  row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  badge: { flexDirection: "row", alignItems: "center", gap: 4 },
-  badgeText: { fontSize: 12, color: colors.textMuted, marginLeft: 3 },
-  price: { fontSize: 13, fontWeight: "700", color: colors.primary },
+  info: {
+    paddingTop: 10,
+  },
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: 8,
+  },
+  title: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: "600",
+    color: colors.text,
+  },
+  ratingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+  },
+  ratingText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: colors.text,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: colors.textMuted,
+    marginTop: 2,
+  },
+  reviews: {
+    fontSize: 14,
+    color: colors.textMuted,
+    marginTop: 2,
+  },
+  priceRow: {
+    marginTop: 6,
+  },
+  priceAmount: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: colors.text,
+  },
+  pricePeriod: {
+    fontSize: 15,
+    color: colors.text,
+  },
 });
