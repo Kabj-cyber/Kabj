@@ -1,0 +1,53 @@
+{
+  "expo": {
+    "name": "detour-app",
+    "slug": "detour-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "DeTour records audio during SOS emergencies to send to local authorities.",
+        "NSLocationWhenInUseUsageDescription": "DeTour uses your location during SOS emergencies to share your GPS coordinates with local authorities."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "config": {
+        "googleMaps": {
+          "apiKey": "YOUR_GOOGLE_MAPS_API_KEY_HERE"
+        }
+      },
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "RECORD_AUDIO",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "DeTour uses your location during SOS emergencies to share your GPS coordinates with local authorities."
+        }
+      ],
+      [
+        "expo-av",
+        {
+          "microphonePermission": "DeTour records audio during SOS emergencies to send to local authorities."
+        }
+      ]
+    ]
+  }
+}
