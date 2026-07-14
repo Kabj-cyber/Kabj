@@ -39,6 +39,6 @@ CREATE TABLE bookings (
 INSERT INTO attractions (title, description, region, category, latitude, longitude, base_price, eco_score, popularity_count) VALUES
 ('Kakum National Park', 'Famous for its rainforest canopy walkway located in the Central Region.', 'Central', 'Nature', 5.4208, -1.3822, 60.00, 0.90, 1540),
 ('Cape Coast Castle', 'A historical landmark detailing the dark history of the trans-Atlantic slave trade.', 'Central', 'Historical', 5.1026, -1.2413, 50.00, 0.75, 2100),
-('Mole National Park', 'Ghana''s largest wildlife refuge featuring savannah elephants and diverse fauna.', 'Savannah', 'Nature', 9.2556, -1.8419, 120.00, 0.95, 890),
+('Mole National Park', 'Ghana''s largest wildlife refuge featuring savannah elephants and diverse fauna.', 'Northern', 'Nature', 9.2556, -1.8419, 120.00, 0.95, 890),
 ('Kwame Nkrumah Memorial Park', 'A beautiful monument dedicated to the founding father of independent Ghana.', 'Greater Accra', 'Historical', 5.5441, -0.2081, 40.00, 0.60, 3200),
 ('Manhyia Palace Museum', 'The historical seat of the Asantehene, rich with Ashanti cultural history.', 'Ashanti', 'Historical', 6.7056, -1.6153, 40.00, 0.80, 1150);
