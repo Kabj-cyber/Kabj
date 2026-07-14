@@ -5,10 +5,16 @@ import {
   Facility,
   FacilityCategory,
   FavoriteToggleResponse,
+  GuideAvailability,
+  GuideEarningsSummary,
+  GuideOnboardingRequest,
+  GuidePayout,
+  GuideProfile,
   InitiatePaymentRequest,
   LoginRequest,
   Payment,
   RegistrationRequest,
+  SetAvailabilityRequest,
   User,
 } from "../types";
 
@@ -124,4 +130,56 @@ export const api = {
 
   getPaymentsForBooking: (bookingId: number) =>
     fetch(`${BASE_URL}/api/payments/booking/${bookingId}`).then((r) => handle<Payment[]>(r)),
+
+  // --- Guides (GuideController) ---
+  onboardGuide: (body: GuideOnboardingRequest) =>
+    fetch(`${BASE_URL}/api/guides/onboard`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }).then((r) => handle<GuideProfile>(r)),
+
+  // GET /api/guides/{id} is not implemented on the backend yet.
+  // Fallback: fetch pending guides and match by profile id (only works while status is PENDING).
+  getGuideProfile: async (guideId: number): Promise<GuideProfile> => {
+    const pending = await fetch(`${BASE_URL}/api/guides/pending`).then((r) =>
+      handle<GuideProfile[]>(r)
+    );
+    const profile = pending.find((p) => p.id === guideId);
+    if (profile) return profile;
+    throw new Error("Guide profile not found");
+  },
+
+  setGuideAvailability: (guideId: number, body: SetAvailabilityRequest) =>
+    fetch(`${BASE_URL}/api/guides/${guideId}/availability`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }).then((r) => handle<GuideAvailability>(r)),
+
+  getGuideAvailability: (guideId: number, from: string, to: string) =>
+    fetch(
+      `${BASE_URL}/api/guides/${guideId}/availability?fromDate=${encodeURIComponent(from)}&toDate=${encodeURIComponent(to)}`
+    ).then((r) => handle<GuideAvailability[]>(r)),
+
+  getGuideEarnings: (guideId: number) =>
+    fetch(`${BASE_URL}/api/guides/${guideId}/earnings`).then(async (r) => {
+      const data = await handle<{
+        totalCompletedBookingRevenue?: number;
+        commissionAmount?: number;
+        pendingPayoutBalance?: number;
+      }>(r);
+      return {
+        totalRevenue: Number(data.totalCompletedBookingRevenue ?? 0),
+        commissionAmount: Number(data.commissionAmount ?? 0),
+        pendingBalance: Number(data.pendingPayoutBalance ?? 0),
+      } satisfies GuideEarningsSummary;
+    }),
+
+  requestGuidePayout: (guideId: number, amount: number, momoNumber: string) =>
+    fetch(`${BASE_URL}/api/guides/${guideId}/payout`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ amount, momoNumber }),
+    }).then((r) => handle<GuidePayout>(r)),
 };
