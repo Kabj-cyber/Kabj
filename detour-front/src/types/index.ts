@@ -115,17 +115,6 @@ export interface InitiatePaymentRequest {
   email?: string;
 }
 
-export interface SafetyAlert {
-  id: number;
-  region: string;
-  title: string;
-  message: string;
-  severity: "INFO" | "WARNING" | "CRITICAL" | string;
-  activeFrom?: string;
-  activeUntil?: string;
-  createdAt?: string;
-}
-
 export interface VerifiedGuide {
   id: number;
   name: string;

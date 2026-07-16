@@ -1,13 +1,5 @@
-CREATE TABLE IF NOT EXISTS safety_alerts (
-    id SERIAL PRIMARY KEY,
-    region VARCHAR(50) NOT NULL,
-    title VARCHAR(150) NOT NULL,
-    message TEXT NOT NULL,
-    severity VARCHAR(20) NOT NULL DEFAULT 'INFO',
-    active_from TIMESTAMP NOT NULL DEFAULT NOW(),
-    active_until TIMESTAMP,
-    created_at TIMESTAMP DEFAULT NOW()
-);
+-- Safety alerts feature has been removed from the app; drop the old table if present.
+DROP TABLE IF EXISTS safety_alerts;
 
 CREATE TABLE IF NOT EXISTS verified_guides (
     id SERIAL PRIMARY KEY,
@@ -30,7 +22,7 @@ CREATE TABLE IF NOT EXISTS emergency_contacts (
     is_primary BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT NOW()
 );
-[01/07/2026 18:55] Kab.J⚓️: CREATE TABLE IF NOT EXISTS safety_incidents (
+CREATE TABLE IF NOT EXISTS safety_incidents (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id),
     latitude DECIMAL(9,6) NOT NULL,
@@ -43,15 +35,6 @@ CREATE TABLE IF NOT EXISTS emergency_contacts (
     submitted_at TIMESTAMP NOT NULL DEFAULT NOW(),
     created_at TIMESTAMP DEFAULT NOW()
 );
-
--- Sample safety alerts
-INSERT INTO safety_alerts (region, title, message, severity)
-SELECT 'Greater Accra', 'Heavy traffic on N1', 'Expect delays near Tema Motorway toll booth between 4–7 PM.', 'WARNING'
-WHERE NOT EXISTS (SELECT 1 FROM safety_alerts LIMIT 1);
-
-INSERT INTO safety_alerts (region, title, message, severity)
-SELECT 'Central', 'Beach safety advisory', 'Strong currents reported at Elmina beach. Swim only in designated areas with a lifeguard.', 'CRITICAL'
-WHERE (SELECT COUNT(*) FROM safety_alerts) < 2;
 
 -- Sample verified transport guides
 INSERT INTO verified_guides (name, phone_number, region, transport_type, license_number, rating)

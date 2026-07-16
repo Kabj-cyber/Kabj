@@ -19,7 +19,7 @@ import Button from "../components/Button";
 import { useAuth } from "../context/AuthContext";
 import { MainTabsParamList, RootStackParamList } from "../navigation/types";
 import { colors, radius } from "../theme";
-import { SafetyAlert, VerifiedGuide } from "../types";
+import { VerifiedGuide } from "../types";
 
 type Props = CompositeScreenProps<
   BottomTabScreenProps<MainTabsParamList, "Safety">,
@@ -32,15 +32,8 @@ const GHANA_EMERGENCY = [
   { label: "Ambulance", number: "193", icon: "medkit" as const },
 ];
 
-function severityColor(severity: string) {
-  if (severity === "CRITICAL") return colors.danger;
-  if (severity === "WARNING") return colors.warning;
-  return colors.primary;
-}
-
 export default function SafetyScreen({ navigation }: Props) {
   const { user } = useAuth();
-  const [alerts, setAlerts] = useState<SafetyAlert[]>([]);
   const [guides, setGuides] = useState<VerifiedGuide[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -48,11 +41,7 @@ export default function SafetyScreen({ navigation }: Props) {
   const load = useCallback(async () => {
     setError(null);
     try {
-      const [alertData, guideData] = await Promise.all([
-        api.getSafetyAlerts(),
-        api.getVerifiedGuides(),
-      ]);
-      setAlerts(alertData);
+      const guideData = await api.getVerifiedGuides();
       setGuides(guideData);
     } catch (e: any) {
       setError(e.message || "Could not load safety data.");
@@ -82,7 +71,7 @@ export default function SafetyScreen({ navigation }: Props) {
       <View style={styles.header}>
         <Ionicons name="shield-checkmark" size={28} color="#fff" />
         <Text style={styles.headerTitle}>Safety Center</Text>
-        <Text style={styles.headerSub}>Real-time alerts, verified guides & emergency help</Text>
+        <Text style={styles.headerSub}>Verified guides & emergency help</Text>
       </View>
 
       <View style={styles.sosCard}>
@@ -140,36 +129,12 @@ export default function SafetyScreen({ navigation }: Props) {
         <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
       </TouchableOpacity>
 
-      <Text style={styles.sectionTitle}>Active safety alerts</Text>
+      <Text style={[styles.sectionTitle, { marginTop: 8 }]}>Verified transport guides</Text>
       {error ? (
         <View style={styles.errorBox}>
           <Text style={styles.errorText}>{error}</Text>
-          <Text style={styles.errorHint}>
-            Run safety-schema.sql in Neon, then restart the backend.
-          </Text>
         </View>
-      ) : alerts.length === 0 ? (
-        <Text style={styles.empty}>No active alerts right now.</Text>
-      ) : (
-        alerts.map((alert) => (
-          <View key={alert.id} style={styles.alertCard}>
-            <View style={[styles.severityDot, { backgroundColor: severityColor(alert.severity) }]} />
-            <View style={{ flex: 1 }}>
-              <View style={styles.alertTop}>
-                <Text style={styles.alertTitle}>{alert.title}</Text>
-                <Text style={[styles.severityBadge, { color: severityColor(alert.severity) }]}>
-                  {alert.severity}
-                </Text>
-              </View>
-              <Text style={styles.alertRegion}>{alert.region}</Text>
-              <Text style={styles.alertMessage}>{alert.message}</Text>
-            </View>
-          </View>
-        ))
-      )}
-
-      <Text style={[styles.sectionTitle, { marginTop: 8 }]}>Verified transport guides</Text>
-      {guides.length === 0 ? (
+      ) : guides.length === 0 ? (
         <Text style={styles.empty}>No verified guides listed yet.</Text>
       ) : (
         <FlatList
@@ -282,23 +247,6 @@ const styles = StyleSheet.create({
   },
   cardTitle: { fontSize: 15, fontWeight: "600", color: colors.text },
   cardSub: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
-  alertCard: {
-    flexDirection: "row",
-    backgroundColor: colors.card,
-    marginHorizontal: 16,
-    marginBottom: 10,
-    padding: 14,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    gap: 10,
-  },
-  severityDot: { width: 4, borderRadius: 2, marginTop: 4 },
-  alertTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", gap: 8 },
-  alertTitle: { flex: 1, fontSize: 14, fontWeight: "700", color: colors.text },
-  severityBadge: { fontSize: 10, fontWeight: "800" },
-  alertRegion: { fontSize: 11, color: colors.textMuted, marginTop: 2 },
-  alertMessage: { fontSize: 13, color: colors.text, marginTop: 6, lineHeight: 18 },
   guideCard: {
     flexDirection: "row",
     alignItems: "center",
@@ -334,5 +282,4 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
   },
   errorText: { color: colors.danger, fontWeight: "600" },
-  errorHint: { color: colors.textMuted, fontSize: 12, marginTop: 4 },
 });

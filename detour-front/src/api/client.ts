@@ -3,6 +3,8 @@ import {
   Attraction,
   Booking,
   BookingRequest,
+  EmergencyContact,
+  EmergencyContactRequest,
   Facility,
   FacilityCategory,
   FavoriteToggleResponse,
@@ -15,8 +17,11 @@ import {
   LoginRequest,
   Payment,
   RegistrationRequest,
+  SafetyIncident,
   SetAvailabilityRequest,
+  SubmitIncidentParams,
   User,
+  VerifiedGuide,
 } from "../types";
 
 // CHANGE THIS to your machine's LAN IP when running on a physical device
@@ -199,4 +204,48 @@ export const api = {
     fetch(`${BASE_URL}/api/notifications/${notificationId}/read`, {
       method: "PATCH",
     }).then((r) => handle<AppNotification>(r)),
+
+  // --- Safety (SafetyController) ---
+  getVerifiedGuides: (region?: string) =>
+    fetch(
+      `${BASE_URL}/api/safety/guides${region ? `?region=${encodeURIComponent(region)}` : ""}`
+    ).then((r) => handle<VerifiedGuide[]>(r)),
+
+  getEmergencyContacts: (userId: number) =>
+    fetch(`${BASE_URL}/api/safety/users/${userId}/emergency-contacts`).then((r) =>
+      handle<EmergencyContact[]>(r)
+    ),
+
+  addEmergencyContact: (userId: number, body: EmergencyContactRequest) =>
+    fetch(`${BASE_URL}/api/safety/users/${userId}/emergency-contacts`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }).then((r) => handle<EmergencyContact>(r)),
+
+  deleteEmergencyContact: (userId: number, contactId: number) =>
+    fetch(`${BASE_URL}/api/safety/users/${userId}/emergency-contacts/${contactId}`, {
+      method: "DELETE",
+    }).then((r) => handle<void>(r)),
+
+  submitSafetyIncident: (params: SubmitIncidentParams) => {
+    const form = new FormData();
+    form.append("userId", String(params.userId));
+    form.append("latitude", String(params.latitude));
+    form.append("longitude", String(params.longitude));
+    form.append("durationSeconds", String(params.durationSeconds));
+    if (params.region) form.append("region", params.region);
+    if (params.audioUri) {
+      form.append("audio", {
+        uri: params.audioUri,
+        name: "safety-recording.m4a",
+        type: "audio/m4a",
+      } as unknown as Blob);
+    }
+
+    return fetch(`${BASE_URL}/api/safety/incidents`, {
+      method: "POST",
+      body: form,
+    }).then((r) => handle<SafetyIncident>(r));
+  },
 };

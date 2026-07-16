@@ -13,7 +13,6 @@ import java.util.List;
 @Service
 public class SafetyService {
 
-    private final SafetyAlertRepository alertRepository;
     private final VerifiedGuideRepository guideRepository;
     private final EmergencyContactRepository contactRepository;
     private final SafetyIncidentRepository incidentRepository;
@@ -21,26 +20,16 @@ public class SafetyService {
     private final NotificationService notificationService;
 
     @Autowired
-    public SafetyService(SafetyAlertRepository alertRepository,
-                         VerifiedGuideRepository guideRepository,
+    public SafetyService(VerifiedGuideRepository guideRepository,
                          EmergencyContactRepository contactRepository,
                          SafetyIncidentRepository incidentRepository,
                          UserRepository userRepository,
                          NotificationService notificationService) {
-        this.alertRepository = alertRepository;
         this.guideRepository = guideRepository;
         this.contactRepository = contactRepository;
         this.incidentRepository = incidentRepository;
         this.userRepository = userRepository;
         this.notificationService = notificationService;
-    }
-
-    public List<SafetyAlert> getActiveAlerts() {
-        return alertRepository.findActiveAlerts(LocalDateTime.now());
-    }
-
-    public List<SafetyAlert> getActiveAlertsByRegion(String region) {
-        return alertRepository.findActiveAlertsByRegion(region, LocalDateTime.now());
     }
 
     public List<VerifiedGuide> getVerifiedGuides(String region) {

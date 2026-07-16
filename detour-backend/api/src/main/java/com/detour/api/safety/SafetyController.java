@@ -29,14 +29,6 @@ public class SafetyController {
         this.safetyService = safetyService;
     }
 
-    @GetMapping("/alerts")
-    public ResponseEntity<List<SafetyAlert>> getAlerts(@RequestParam(required = false) String region) {
-        if (region != null && !region.isBlank()) {
-            return ResponseEntity.ok(safetyService.getActiveAlertsByRegion(region));
-        }
-        return ResponseEntity.ok(safetyService.getActiveAlerts());
-    }
-
     @GetMapping("/guides")
     public ResponseEntity<List<VerifiedGuide>> getVerifiedGuides(
             @RequestParam(required = false) String region) {
