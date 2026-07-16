@@ -4,6 +4,7 @@ package com.detour.api.bookings;
 import com.detour.api.attractions.Attraction;
 import com.detour.api.attractions.AttractionRepository;
 import com.detour.api.bookings.dto.BookingRequest;
+import com.detour.api.notifications.NotificationService;
 import com.detour.api.users.User;
 import com.detour.api.users.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,14 +19,17 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
     private final AttractionRepository attractionRepository;
+    private final NotificationService notificationService;
 
     @Autowired
     public BookingService(BookingRepository bookingRepository,
                           UserRepository userRepository,
-                          AttractionRepository attractionRepository) {
+                          AttractionRepository attractionRepository,
+                          NotificationService notificationService) {
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
         this.attractionRepository = attractionRepository;
+        this.notificationService = notificationService;
     }
 
     public Booking createBooking(BookingRequest request) {
@@ -45,7 +49,17 @@ public class BookingService {
         newBooking.setBookingDate(LocalDateTime.now()); // Setting the trip for right now
 
         // 4. Save to Neon
-        return bookingRepository.save(newBooking);
+        Booking savedBooking = bookingRepository.save(newBooking);
+
+        // 5. Let the tourist know their booking went through
+        notificationService.create(
+                tourist.getId(),
+                "BOOKING_CREATED",
+                "Booking confirmed",
+                "Your booking for " + attraction.getTitle() + " has been submitted."
+        );
+
+        return savedBooking;
     }
 
     public List<Booking> getBookingsForUser(Integer userId) {

@@ -1,6 +1,7 @@
 package com.detour.api.users;
 
 
+import com.detour.api.notifications.NotificationService;
 import com.detour.api.users.dto.LoginRequest;
 import com.detour.api.users.dto.RegistrationRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +15,14 @@ import java.util.Optional;
 
         private final UserRepository userRepository;
         private final PasswordEncoder passwordEncoder;
+        private final NotificationService notificationService;
 
         @Autowired
-        public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder,
+                            NotificationService notificationService) {
             this.userRepository = userRepository;
             this.passwordEncoder = passwordEncoder;
+            this.notificationService = notificationService;
         }
 
         public User registerUser(RegistrationRequest request) {
@@ -48,6 +52,13 @@ import java.util.Optional;
             if (!passwordEncoder.matches(request.password, user.getPasswordHash())) {
                 throw new RuntimeException("Invalid password!");
             }
+
+            notificationService.create(
+                    user.getId(),
+                    "LOGIN_SUCCESS",
+                    "Welcome back",
+                    "You've successfully logged in as " + user.getName() + "."
+            );
 
             return user; // Login successful!
         }

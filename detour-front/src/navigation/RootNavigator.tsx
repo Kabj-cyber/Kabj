@@ -9,6 +9,7 @@ import BookTourScreen from "../screens/BookTourScreen";
 import PaymentScreen from "../screens/PaymentScreen";
 import EmergencyContactsScreen from "../screens/EmergencyContactsScreen";
 import SOSRecordingScreen from "../screens/SOSRecordingScreen";
+import NotificationsScreen from "../screens/NotificationsScreen";
 import MainTabs from "./MainTabs";
 import GuideTabs from "./GuideTabs";
 import GuideOnboardingScreen from "../screens/guide/GuideOnboardingScreen";
@@ -31,6 +32,7 @@ export default function RootNavigator() {
       <Stack.Screen name="Payment" component={PaymentScreen} />
       <Stack.Screen name="EmergencyContacts" component={EmergencyContactsScreen} />
       <Stack.Screen name="SOSRecording" component={SOSRecordingScreen} />
+      <Stack.Screen name="Notifications" component={NotificationsScreen} />
     </Stack.Navigator>
   );
 }

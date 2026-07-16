@@ -6,6 +6,7 @@ import { api } from "../api/client";
 import Button from "../components/Button";
 import Input from "../components/Input";
 import { useAuth } from "../context/AuthContext";
+import { useNotifications } from "../context/NotificationContext";
 import { RootStackParamList } from "../navigation/types";
 import { colors, radius } from "../theme";
 import { PaymentMethodType } from "../types";
@@ -45,6 +46,7 @@ const PAYMENT_METHODS: {
 export default function BookTourScreen({ route, navigation }: Props) {
   const { attraction } = route.params;
   const { user } = useAuth();
+  const { refresh: refreshNotifications } = useNotifications();
   const [people, setPeople] = useState(2);
   const [loading, setLoading] = useState(false);
   const [method, setMethod] = useState<PaymentMethodType>("MTN_MOMO");
@@ -72,6 +74,10 @@ export default function BookTourScreen({ route, navigation }: Props) {
         attractionId: attraction.id,
         totalAmount,
       });
+
+      // Booking creation triggers a backend notification — pull it in right
+      // away so the heads-up banner doesn't wait for the next poll cycle.
+      refreshNotifications();
 
       const payment = await api.initiatePayment({
         bookingId: booking.id,

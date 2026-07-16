@@ -14,6 +14,7 @@ export type RootStackParamList = {
   Payment: { paymentId: number; attractionTitle: string };
   EmergencyContacts: undefined;
   SOSRecording: undefined;
+  Notifications: undefined;
 };
 
 export type MainTabsParamList = {

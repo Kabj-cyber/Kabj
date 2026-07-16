@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { api } from "../api/client";
 import Button from "../components/Button";
+import { useNotifications } from "../context/NotificationContext";
 import { RootStackParamList } from "../navigation/types";
 import { colors, radius } from "../theme";
 import { Payment, PaymentMethodType } from "../types";
@@ -32,6 +33,7 @@ const METHOD_ICONS: Record<PaymentMethodType, keyof typeof Ionicons.glyphMap> = 
 
 export default function PaymentScreen({ route, navigation }: Props) {
   const { paymentId, attractionTitle } = route.params;
+  const { refresh: refreshNotifications } = useNotifications();
   const [payment, setPayment] = useState<Payment | null>(null);
   const [loading, setLoading] = useState(true);
   const [confirming, setConfirming] = useState(false);
@@ -65,6 +67,7 @@ export default function PaymentScreen({ route, navigation }: Props) {
       const updated = await refresh();
       if (updated?.status === "SUCCESS") {
         clearInterval(pollRef.current!);
+        refreshNotifications();
         Alert.alert("Payment successful", "Your booking is confirmed and paid.", [
           { text: "View Bookings", onPress: () => navigation.navigate("MainTabs") },
         ]);
@@ -89,6 +92,7 @@ export default function PaymentScreen({ route, navigation }: Props) {
     try {
       const updated = await api.confirmSandboxPayment(paymentId);
       setPayment(updated);
+      refreshNotifications();
       Alert.alert("Payment successful", "Your booking is confirmed and paid.", [
         { text: "View Bookings", onPress: () => navigation.navigate("MainTabs") },
       ]);

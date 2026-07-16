@@ -247,7 +247,7 @@ export default function HomeScreen({ navigation }: Props) {
             </View>
             <TouchableOpacity
               style={styles.notifButton}
-              onPress={() => navigation.navigate("MainTabs", { screen: "Safety" })}
+              onPress={() => navigation.navigate("Notifications")}
             >
               <Ionicons name="notifications-outline" size={24} color="#fff" />
               {unreadCount > 0 && <View style={styles.notifDot} />}
