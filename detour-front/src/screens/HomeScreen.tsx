@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { CompositeScreenProps } from "@react-navigation/native";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
+import { LinearGradient } from "expo-linear-gradient";
 import * as Location from "expo-location";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -47,11 +48,12 @@ const CATEGORIES = [
 
 function CardGradient() {
   return (
-    <View style={styles.cardGradient} pointerEvents="none">
-      <View style={[styles.gradientLayer, { height: "30%", opacity: 0.2 }]} />
-      <View style={[styles.gradientLayer, { height: "50%", opacity: 0.45 }]} />
-      <View style={[styles.gradientLayer, { height: "70%", opacity: 0.7 }]} />
-    </View>
+    <LinearGradient
+      colors={["transparent", "rgba(0,0,0,0.05)", "rgba(0,0,0,0.75)"]}
+      locations={[0, 0.45, 1]}
+      style={styles.cardGradient}
+      pointerEvents="none"
+    />
   );
 }
 
@@ -546,13 +548,6 @@ const styles = StyleSheet.create({
   cardGradient: {
     ...StyleSheet.absoluteFillObject,
     justifyContent: "flex-end",
-  },
-  gradientLayer: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "#000",
   },
   recTextStack: {
     position: "absolute",

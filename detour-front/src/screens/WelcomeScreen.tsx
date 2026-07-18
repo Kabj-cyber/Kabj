@@ -10,7 +10,6 @@ import Svg, {
   RadialGradient,
   Rect,
   Stop,
-  Text as SvgText,
 } from "react-native-svg";
 import { RootStackParamList } from "../navigation/types";
 
@@ -51,128 +50,107 @@ export default function WelcomeScreen({ navigation }: Props) {
         <Text style={styles.brand}>DeTour</Text>
         <Text style={styles.tagline}>Discover Ghana.{"\n"}Live the Culture.</Text>
 
-        {/* ---------- Scenic illustration ---------- */}
-        <Svg width="100%" height={260} viewBox="0 0 400 300" style={styles.scene}>
+        {/* ---------- Isometric monument illustration ---------- */}
+        <Svg width="100%" height={280} viewBox="0 0 400 320" style={styles.scene}>
           <Defs>
-            <RadialGradient id="sunGlow" cx="50%" cy="62%" r="55%">
-              <Stop offset="0%" stopColor="#f5c542" stopOpacity={0.55} />
-              <Stop offset="45%" stopColor="#e8871e" stopOpacity={0.25} />
-              <Stop offset="100%" stopColor="#e8871e" stopOpacity={0} />
+            <RadialGradient id="haloGlow" cx="50%" cy="58%" r="42%">
+              <Stop offset="0%" stopColor="#e8d98a" stopOpacity={0.35} />
+              <Stop offset="60%" stopColor="#c9b96a" stopOpacity={0.12} />
+              <Stop offset="100%" stopColor="#c9b96a" stopOpacity={0} />
+            </RadialGradient>
+            <RadialGradient id="doorGlow" cx="50%" cy="30%" r="80%">
+              <Stop offset="0%" stopColor="#f6d873" stopOpacity={0.9} />
+              <Stop offset="100%" stopColor="#e8a83b" stopOpacity={0.15} />
             </RadialGradient>
           </Defs>
 
-          <Rect x={0} y={0} width={400} height={300} fill="url(#sunGlow)" />
+          <Ellipse cx={200} cy={186} rx={190} ry={150} fill="url(#haloGlow)" />
 
-          {/* sun rays */}
-          <G opacity={0.5}>
-            {[-60, -40, -20, 0, 20, 40, 60].map((angle, i) => (
-              <Path
-                key={angle}
-                d="M200,205 L186,40 L214,40 Z"
-                fill="#f7c65a"
-                opacity={i % 2 === 0 ? 0.18 : 0.09}
-                transform={`rotate(${angle} 200 205)`}
-              />
-            ))}
-          </G>
-
-          {/* clouds */}
-          <G fill="#c9822f" opacity={0.35}>
-            <Ellipse cx={60} cy={85} rx={34} ry={10} />
-            <Ellipse cx={90} cy={80} rx={22} ry={8} />
-            <Ellipse cx={330} cy={70} rx={30} ry={9} />
-            <Ellipse cx={300} cy={65} rx={18} ry={7} />
-            <Ellipse cx={250} cy={100} rx={26} ry={8} />
-            <Ellipse cx={130} cy={110} rx={20} ry={7} />
-          </G>
-
-          {/* distant hills */}
-          <Path
-            d="M0,215 Q60,190 130,210 T260,205 T400,218 L400,300 L0,300 Z"
-            fill="#0a3319"
-            opacity={0.55}
-          />
-
-          {/* water */}
-          <G opacity={0.5} stroke="#4fa5c4" strokeWidth={1.4} fill="none">
-            <Path d="M20,238 Q45,234 70,238" />
-            <Path d="M15,248 Q40,244 65,248" />
-            <Path d="M300,240 Q330,236 360,240" />
-            <Path d="M295,250 Q325,246 355,250" />
-          </G>
-
-          {/* foreground land */}
-          <Path
-            d="M0,258 Q100,240 200,254 T400,252 L400,300 L0,300 Z"
-            fill="#0a2d16"
-          />
-
-          {/* Independence Arch */}
-          <G>
-            <Path d="M197 128 L203 128 L207 142 L193 142 Z" fill="#12210f" />
-            <Rect x={148} y={144} width={104} height={18} rx={2} fill="#cbb08a" />
-            <SvgText
-              x={200}
-              y={156}
-              fontSize={7}
-              fill="#7a6748"
-              textAnchor="middle"
-              fontWeight="bold"
-            >
-              AD 1957
-            </SvgText>
-            <Rect x={152} y={166} width={96} height={10} fill="#bfa47c" />
-            <SvgText
-              x={200}
-              y={174}
-              fontSize={5.5}
-              fill="#6b5a3f"
-              textAnchor="middle"
-            >
-              FREEDOM AND JUSTICE
-            </SvgText>
-            <Rect x={152} y={176} width={14} height={80} fill="#c9ad82" />
-            <Rect x={186} y={176} width={14} height={80} fill="#c9ad82" />
-            <Rect x={214} y={176} width={14} height={80} fill="#c9ad82" />
-            <Rect x={234} y={176} width={14} height={80} fill="#c9ad82" />
-            <Rect x={148} y={252} width={104} height={8} fill="#b39a72" />
+          {/* faint clouds */}
+          <G fill="#3d5a3f" opacity={0.4}>
+            <Ellipse cx={70} cy={100} rx={36} ry={8} />
+            <Ellipse cx={100} cy={94} rx={20} ry={6} />
+            <Ellipse cx={330} cy={110} rx={40} ry={9} />
+            <Ellipse cx={295} cy={104} rx={20} ry={6} />
           </G>
 
           {/* birds */}
-          <G stroke="#0d2410" strokeWidth={1.6} fill="none" opacity={0.75}>
-            <Path d="M60,60 Q66,52 72,60 Q78,52 84,60" />
-            <Path d="M110,95 Q115,89 120,95 Q125,89 130,95" />
-            <Path d="M300,150 Q305,144 310,150 Q315,144 320,150" />
-            <Path d="M340,110 Q345,104 350,110 Q355,104 360,110" />
+          <G stroke="#12321c" strokeWidth={1.6} fill="none" opacity={0.7}>
+            <Path d="M310,140 Q315,134 320,140 Q325,134 330,140" />
+            <Path d="M345,166 Q349,161 353,166 Q357,161 361,166" />
           </G>
 
-          {/* large left palm */}
+          {/* ---- isometric step base (widest) ---- */}
+          <Path d="M200,236 L296,254 L200,272 L104,254 Z" fill="#e4d6b8" />
+          <Path d="M104,254 L200,272 L200,288 L104,270 Z" fill="#b39a6f" />
+          <Path d="M200,272 L296,254 L296,270 L200,288 Z" fill="#c9b183" />
+
+          {/* ---- middle step ---- */}
+          <Path d="M200,220 L272,235 L200,250 L128,235 Z" fill="#ecdfc4" />
+          <Path d="M128,235 L200,250 L200,264 L128,249 Z" fill="#b8a074" />
+          <Path d="M200,250 L272,235 L272,249 L200,264 Z" fill="#cdb689" />
+
+          {/* ---- cube body with doorway ---- */}
+          <Path d="M200,158 L252,183 L200,208 L148,183 Z" fill="#f0e4ca" />
+          <Path d="M148,183 L200,208 L200,250 L148,225 Z" fill="#b9a077" />
+          <Path d="M200,208 L252,183 L252,225 L200,250 Z" fill="#d3bd91" />
+
+          {/* glowing doorway slit */}
+          <Path
+            d="M200,210 L212,216 L212,246 L200,240 Z"
+            fill="url(#doorGlow)"
+          />
+          <Path
+            d="M200,210 L188,216 L188,246 L200,240 Z"
+            fill="#8a6f3a"
+            opacity={0.55}
+          />
+
+          {/* ---- folded chevron roof ---- */}
+          <Path d="M200,120 L268,152 L200,184 L132,152 Z" fill="#f2e7cd" />
+          <Path d="M132,152 L200,184 L200,196 L132,164 Z" fill="#c1aa7e" />
+          <Path d="M200,184 L268,152 L268,164 L200,196 Z" fill="#d8c398" />
+
+          <Path d="M200,132 L246,154 L200,176 L154,154 Z" fill="#e9dcbe" />
+          <Path d="M154,154 L200,176 L200,186 L154,164 Z" fill="#b39c72" />
+          <Path d="M200,176 L246,154 L246,164 L200,186 Z" fill="#cbb589" />
+
+          {/* star finial */}
+          <Path
+            d="M200,98 L203,107 L212,107 L204.5,112.5 L207.5,121 L200,115.5 L192.5,121 L195.5,112.5 L188,107 L197,107 Z"
+            fill="#12321c"
+          />
+
+          {/* potted plants */}
           <G>
+            <Ellipse cx={90} cy={252} rx={22} ry={16} fill="#1f5c34" />
             <Path
-              d="M55,290 C50,250 62,215 70,190"
-              stroke="#0a2c14"
-              strokeWidth={5}
+              d="M90,238 L82,214 M90,238 L92,210 M90,238 L100,216"
+              stroke="#123a1f"
+              strokeWidth={2.5}
               fill="none"
+              strokeLinecap="round"
             />
-            <Path d="M70,190 C40,180 20,190 8,178" fill="#0d3d1f" />
-            <Path d="M70,190 C48,165 30,160 18,142" fill="#0d3d1f" />
-            <Path d="M70,190 C64,158 70,140 62,120" fill="#0d3d1f" />
-            <Path d="M70,190 C82,160 100,150 108,132" fill="#0d3d1f" />
-            <Path d="M70,190 C92,178 112,180 126,170" fill="#0d3d1f" />
+            <Ellipse cx={310} cy={252} rx={22} ry={16} fill="#1f5c34" />
+            <Path
+              d="M310,238 L302,214 M310,238 L312,210 M310,238 L320,216"
+              stroke="#123a1f"
+              strokeWidth={2.5}
+              fill="none"
+              strokeLinecap="round"
+            />
           </G>
 
-          {/* small right palms */}
-          <G>
-            <Path
-              d="M320,275 C317,250 324,228 330,212"
-              stroke="#0a2c14"
-              strokeWidth={4}
-              fill="none"
-            />
-            <Path d="M330,212 C312,204 298,210 288,200" fill="#0d3d1f" />
-            <Path d="M330,212 C316,192 304,188 296,174" fill="#0d3d1f" />
-            <Path d="M330,212 C340,190 352,184 358,170" fill="#0d3d1f" />
-            <Path d="M330,212 C346,204 360,206 370,198" fill="#0d3d1f" />
+          {/* grass line */}
+          <Rect x={0} y={262} width={400} height={16} fill="#1f5c34" opacity={0.9} />
+
+          {/* water reflection */}
+          <Rect x={0} y={278} width={400} height={42} fill="#0b3320" />
+          <G opacity={0.35} stroke="#4fa5c4" strokeWidth={1.2} fill="none">
+            <Path d="M40,292 Q70,288 100,292" />
+            <Path d="M60,304 Q90,300 120,304" />
+            <Path d="M280,294 Q310,290 340,294" />
+            <Path d="M270,306 Q300,302 330,306" />
           </G>
         </Svg>
       </View>
