@@ -12,4 +12,6 @@ public interface GuideProfileRepository extends JpaRepository<GuideProfile, Inte
     Optional<GuideProfile> findByUserId(Integer userId);
 
     List<GuideProfile> findByVerificationStatus(VerificationStatus verificationStatus);
+
+    List<GuideProfile> findByRegionAndVerificationStatus(String region, VerificationStatus verificationStatus);
 }

@@ -8,11 +8,13 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
 import { api } from "../../api/client";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
+import { GUIDE_REGIONS } from "../../constants/regions";
 import { useAuth } from "../../context/AuthContext";
 import { cacheGuideProfile, resolveGuideProfile } from "../../navigation/guideRouting";
 import { RootStackParamList } from "../../navigation/types";
@@ -54,6 +56,7 @@ export default function GuideOnboardingScreen({ navigation }: Props) {
   const [gtaLicenseNo, setGtaLicenseNo] = useState("");
   const [ghanaCardNumber, setGhanaCardNumber] = useState("");
   const [companyName, setCompanyName] = useState("");
+  const [region, setRegion] = useState<string | null>(null);
   const [companyError, setCompanyError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -84,7 +87,7 @@ export default function GuideOnboardingScreen({ navigation }: Props) {
   const handleSubmit = async () => {
     if (!user) return;
 
-    if (!bio || !specialty || !languages || !gtaLicenseNo || !ghanaCardNumber) {
+    if (!bio || !specialty || !languages || !gtaLicenseNo || !ghanaCardNumber || !region) {
       Alert.alert("Missing info", "All fields are required.");
       return;
     }
@@ -105,6 +108,7 @@ export default function GuideOnboardingScreen({ navigation }: Props) {
         gtaLicenseNo,
         ghanaCardNumber,
         companyName: companyName.trim(),
+        region,
       });
       await cacheGuideProfile(profile);
       setExistingProfile(profile);
@@ -157,6 +161,24 @@ export default function GuideOnboardingScreen({ navigation }: Props) {
               onChangeText={setLanguages}
               placeholder="English, Twi, Ga"
             />
+            <Text style={styles.fieldLabel}>Region you cover</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.chipsRow}
+            >
+              {GUIDE_REGIONS.map((item) => (
+                <TouchableOpacity
+                  key={item}
+                  style={[styles.chip, region === item && styles.chipActive]}
+                  onPress={() => setRegion(item)}
+                >
+                  <Text style={[styles.chipText, region === item && styles.chipTextActive]}>
+                    {item}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
             <Input
               label="GTA license number"
               value={gtaLicenseNo}
@@ -193,6 +215,20 @@ const styles = StyleSheet.create({
   scroll: { padding: 24, paddingTop: 60, flexGrow: 1 },
   title: { fontSize: 26, fontWeight: "800", color: colors.text, marginBottom: 4 },
   subtitle: { fontSize: 14, color: colors.textMuted, marginBottom: 24 },
+  fieldLabel: { fontSize: 14, fontWeight: "600", color: colors.text, marginBottom: 8 },
+  chipsRow: { gap: 8, paddingBottom: 16 },
+  chip: {
+    paddingHorizontal: 16,
+    paddingVertical: 9,
+    borderRadius: radius.pill,
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    marginRight: 8,
+  },
+  chipActive: { backgroundColor: colors.text, borderColor: colors.text },
+  chipText: { color: colors.textMuted, fontSize: 13, fontWeight: "600" },
+  chipTextActive: { color: "#fff" },
   muted: { color: colors.textMuted, marginBottom: 16 },
   errorText: { color: colors.danger, fontSize: 13, marginTop: -8, marginBottom: 8 },
   statusBanner: {

@@ -2,6 +2,7 @@ package com.detour.api.payments;
 
 import com.detour.api.bookings.Booking;
 import com.detour.api.bookings.BookingRepository;
+import com.detour.api.guides.GuideService;
 import com.detour.api.notifications.NotificationService;
 import com.detour.api.payments.config.PaymentProperties;
 import com.detour.api.payments.dto.InitiatePaymentRequest;
@@ -25,6 +26,7 @@ public class PaymentService {
     private final MtnMomoGateway mtnMomoGateway;
     private final VodafoneCashGateway vodafoneCashGateway;
     private final CardPaymentGateway cardPaymentGateway;
+    private final GuideService guideService;
 
     public PaymentService(
             PaymentRepository paymentRepository,
@@ -34,7 +36,8 @@ public class PaymentService {
             SandboxPaymentGateway sandboxGateway,
             MtnMomoGateway mtnMomoGateway,
             VodafoneCashGateway vodafoneCashGateway,
-            CardPaymentGateway cardPaymentGateway
+            CardPaymentGateway cardPaymentGateway,
+            GuideService guideService
     ) {
         this.paymentRepository = paymentRepository;
         this.bookingRepository = bookingRepository;
@@ -44,6 +47,7 @@ public class PaymentService {
         this.mtnMomoGateway = mtnMomoGateway;
         this.vodafoneCashGateway = vodafoneCashGateway;
         this.cardPaymentGateway = cardPaymentGateway;
+        this.guideService = guideService;
     }
 
     @Transactional
@@ -146,6 +150,11 @@ public class PaymentService {
 
     @Transactional
     public void handleWebhook(String provider, Map<String, Object> payload) {
+        if ("transfer".equals(provider)) {
+            handleTransferWebhook(payload);
+            return;
+        }
+
         String reference = extractReference(provider, payload);
         if (reference == null) return;
 
@@ -154,6 +163,29 @@ public class PaymentService {
             applyStatus(payment, status);
             paymentRepository.save(payment);
         });
+    }
+
+    @Transactional
+    public void handleTransferWebhook(Map<String, Object> payload) {
+        String event = payload.get("event") != null ? String.valueOf(payload.get("event")) : null;
+        if (event == null || (!event.equals("transfer.success") && !event.equals("transfer.failed"))) {
+            return;
+        }
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> data = (Map<String, Object>) payload.get("data");
+        if (data == null) {
+            return;
+        }
+
+        String reference = data.get("reference") != null
+                ? String.valueOf(data.get("reference"))
+                : null;
+        String status = data.get("status") != null
+                ? String.valueOf(data.get("status"))
+                : (event.equals("transfer.success") ? "success" : "failed");
+
+        guideService.applyTransferWebhookStatus(reference, status);
     }
 
     private void applyStatus(Payment payment, String status) {

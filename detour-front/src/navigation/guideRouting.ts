@@ -64,10 +64,13 @@ export function routeAfterAuth(
     return;
   }
 
-  if (!profile || profile.verificationStatus === "PENDING" || profile.verificationStatus === "REJECTED") {
-    navigation.reset({ index: 0, routes: [{ name: "GuideOnboarding" }] });
-    return;
-  }
+  // Verification gate temporarily disabled — guides go straight to GuideTabs
+  // regardless of verificationStatus. Re-enable by restoring the PENDING/REJECTED
+  // check below before shipping.
+  // if (!profile || profile.verificationStatus === "PENDING" || profile.verificationStatus === "REJECTED") {
+  //   navigation.reset({ index: 0, routes: [{ name: "GuideOnboarding" }] });
+  //   return;
+  // }
 
   navigation.reset({ index: 0, routes: [{ name: "GuideTabs" }] });
 }

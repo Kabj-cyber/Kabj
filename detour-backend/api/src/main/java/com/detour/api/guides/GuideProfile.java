@@ -33,6 +33,9 @@ public class GuideProfile {
     @Column(name = "company_name", length = 150)
     private String companyName;
 
+    @Column(length = 50)
+    private String region;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "verification_status", nullable = false, length = 20)
     private VerificationStatus verificationStatus = VerificationStatus.PENDING;
@@ -42,6 +45,12 @@ public class GuideProfile {
 
     @Column(name = "base_rate_per_hour", precision = 10, scale = 2)
     private BigDecimal baseRatePerHour;
+
+    @Column(name = "payout_momo_number", length = 20)
+    private String payoutMomoNumber;
+
+    @Column(name = "payout_telco", length = 10)
+    private String payoutTelco;
 
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -70,6 +79,9 @@ public class GuideProfile {
     public String getCompanyName() { return companyName; }
     public void setCompanyName(String companyName) { this.companyName = companyName; }
 
+    public String getRegion() { return region; }
+    public void setRegion(String region) { this.region = region; }
+
     public VerificationStatus getVerificationStatus() { return verificationStatus; }
     public void setVerificationStatus(VerificationStatus verificationStatus) { this.verificationStatus = verificationStatus; }
 
@@ -78,6 +90,12 @@ public class GuideProfile {
 
     public BigDecimal getBaseRatePerHour() { return baseRatePerHour; }
     public void setBaseRatePerHour(BigDecimal baseRatePerHour) { this.baseRatePerHour = baseRatePerHour; }
+
+    public String getPayoutMomoNumber() { return payoutMomoNumber; }
+    public void setPayoutMomoNumber(String payoutMomoNumber) { this.payoutMomoNumber = payoutMomoNumber; }
+
+    public String getPayoutTelco() { return payoutTelco; }
+    public void setPayoutTelco(String payoutTelco) { this.payoutTelco = payoutTelco; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

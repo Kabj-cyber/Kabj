@@ -4,6 +4,11 @@ package com.detour.api.bookings;
 import com.detour.api.attractions.Attraction;
 import com.detour.api.attractions.AttractionRepository;
 import com.detour.api.bookings.dto.BookingRequest;
+import com.detour.api.bookings.qr.QrTokenService;
+import com.detour.api.guides.GuideProfile;
+import com.detour.api.guides.GuideProfileRepository;
+import com.detour.api.guides.GuideService;
+import com.detour.api.guides.VerificationStatus;
 import com.detour.api.notifications.NotificationService;
 import com.detour.api.users.User;
 import com.detour.api.users.UserRepository;
@@ -11,52 +16,102 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
 public class BookingService {
 
+    private static final String PENDING_EXECUTION = "PENDING_EXECUTION";
+    private static final String COMPLETED = "COMPLETED";
+    private static final DateTimeFormatter BOOKING_DATE_FORMAT =
+            DateTimeFormatter.ofPattern("MMM d, yyyy 'at' h:mm a");
+
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
     private final AttractionRepository attractionRepository;
+    private final GuideProfileRepository guideProfileRepository;
     private final NotificationService notificationService;
+    private final QrTokenService qrTokenService;
+    private final GuideService guideService;
 
     @Autowired
     public BookingService(BookingRepository bookingRepository,
                           UserRepository userRepository,
                           AttractionRepository attractionRepository,
-                          NotificationService notificationService) {
+                          GuideProfileRepository guideProfileRepository,
+                          NotificationService notificationService,
+                          QrTokenService qrTokenService,
+                          GuideService guideService) {
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
         this.attractionRepository = attractionRepository;
+        this.guideProfileRepository = guideProfileRepository;
         this.notificationService = notificationService;
+        this.qrTokenService = qrTokenService;
+        this.guideService = guideService;
     }
 
     public Booking createBooking(BookingRequest request) {
-        // 1. Verify the User exists
         User tourist = userRepository.findById(request.touristId)
                 .orElseThrow(() -> new RuntimeException("Tourist not found!"));
 
-        // 2. Verify the Attraction exists
         Attraction attraction = attractionRepository.findById(request.attractionId)
                 .orElseThrow(() -> new RuntimeException("Attraction not found!"));
 
-        // 3. Assemble the Booking
         Booking newBooking = new Booking();
         newBooking.setTourist(tourist);
         newBooking.setAttraction(attraction);
         newBooking.setTotalAmount(request.totalAmount);
-        newBooking.setBookingDate(LocalDateTime.now()); // Setting the trip for right now
+        newBooking.setBookingDate(LocalDateTime.now());
 
-        // 4. Save to Neon
         Booking savedBooking = bookingRepository.save(newBooking);
 
-        // 5. Let the tourist know their booking went through
+        List<GuideProfile> candidates = guideProfileRepository.findByRegionAndVerificationStatus(
+                attraction.getRegion(), VerificationStatus.APPROVED);
+
+        if (candidates.isEmpty()) {
+            notificationService.create(
+                    tourist.getId(),
+                    "GUIDE_PENDING",
+                    "We're finding you a guide",
+                    "We're matching you with a licensed guide for this region — you'll be notified once confirmed."
+            );
+            return savedBooking;
+        }
+
+        GuideProfile assignedGuide = candidates.get(0);
+        long minActive = bookingRepository.countByGuideProfileIdAndExecutionStatus(
+                assignedGuide.getId(), PENDING_EXECUTION);
+
+        for (int i = 1; i < candidates.size(); i++) {
+            GuideProfile candidate = candidates.get(i);
+            long activeCount = bookingRepository.countByGuideProfileIdAndExecutionStatus(
+                    candidate.getId(), PENDING_EXECUTION);
+            if (activeCount < minActive) {
+                minActive = activeCount;
+                assignedGuide = candidate;
+            }
+        }
+
+        savedBooking.setGuideProfileId(assignedGuide.getId());
+        savedBooking = bookingRepository.save(savedBooking);
+
+        String bookingDateStr = savedBooking.getBookingDate().format(BOOKING_DATE_FORMAT);
+        notificationService.create(
+                assignedGuide.getUserId(),
+                "NEW_BOOKING_ASSIGNED",
+                "New tour assigned",
+                "You've been assigned a tour: " + attraction.getTitle() + " on " + bookingDateStr
+        );
+
+        User guideUser = userRepository.findById(assignedGuide.getUserId())
+                .orElseThrow(() -> new RuntimeException("Guide user not found"));
         notificationService.create(
                 tourist.getId(),
-                "BOOKING_CREATED",
-                "Booking confirmed",
-                "Your booking for " + attraction.getTitle() + " has been submitted."
+                "GUIDE_ASSIGNED",
+                "Guide confirmed",
+                guideUser.getName() + " will be your guide for " + attraction.getTitle() + "."
         );
 
         return savedBooking;
@@ -64,5 +119,66 @@ public class BookingService {
 
     public List<Booking> getBookingsForUser(Integer userId) {
         return bookingRepository.findByTouristId(userId);
+    }
+
+    public String getQrToken(Integer bookingId, Integer requestingTouristId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+
+        if (!booking.getTourist().getId().equals(requestingTouristId)) {
+            throw new RuntimeException("You are not authorized to request a QR token for this booking");
+        }
+        if (!"PAID".equals(booking.getPaymentStatus())) {
+            throw new RuntimeException("Booking payment status must be PAID (current: " + booking.getPaymentStatus() + ")");
+        }
+        if (!PENDING_EXECUTION.equals(booking.getExecutionStatus())) {
+            throw new RuntimeException("Booking execution status must be PENDING_EXECUTION (current: "
+                    + booking.getExecutionStatus() + ")");
+        }
+
+        String token = qrTokenService.generateToken(bookingId);
+        booking.setQrTokenIssuedAt(LocalDateTime.now());
+        bookingRepository.save(booking);
+        return token;
+    }
+
+    public Booking completeBookingByScan(String token, Integer scanningGuideUserId) {
+        Integer bookingId = qrTokenService.verifyToken(token);
+
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+
+        if (COMPLETED.equals(booking.getExecutionStatus())) {
+            throw new RuntimeException("This booking has already been completed");
+        }
+        if (booking.getGuideProfileId() == null) {
+            throw new RuntimeException("This booking has no assigned guide");
+        }
+
+        GuideProfile guideProfile = guideProfileRepository.findById(booking.getGuideProfileId())
+                .orElseThrow(() -> new RuntimeException("Guide not found"));
+
+        if (!guideProfile.getUserId().equals(scanningGuideUserId)) {
+            throw new RuntimeException("This booking is not assigned to you");
+        }
+
+        booking.setExecutionStatus(COMPLETED);
+        booking.setCompletedAt(LocalDateTime.now());
+        Booking savedBooking = bookingRepository.save(booking);
+
+        guideService.triggerScanPayout(
+                booking.getGuideProfileId(),
+                booking.getTotalAmount(),
+                booking.getId()
+        );
+
+        notificationService.create(
+                booking.getTourist().getId(),
+                "TOUR_COMPLETED",
+                "Tour completed",
+                "Your tour has been marked complete. Thanks for booking with DeTour!"
+        );
+
+        return savedBooking;
     }
 }

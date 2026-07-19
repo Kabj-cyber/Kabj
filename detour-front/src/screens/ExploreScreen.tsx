@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { api } from "../api/client";
 import AttractionsSection from "../components/AttractionsSection";
+import { REGIONS } from "../constants/regions";
 import { useAuth } from "../context/AuthContext";
 import { MainTabsParamList, RootStackParamList } from "../navigation/types";
 import { colors, radius } from "../theme";
@@ -21,17 +22,6 @@ type Props = CompositeScreenProps<
   BottomTabScreenProps<MainTabsParamList, "Explore">,
   NativeStackScreenProps<RootStackParamList>
 >;
-
-const REGIONS = [
-  "All",
-  "Greater Accra",
-  "Ashanti",
-  "Central",
-  "Western",
-  "Volta",
-  "Eastern",
-  "Northern",
-];
 
 export default function ExploreScreen({ navigation }: Props) {
   const { user } = useAuth();

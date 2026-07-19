@@ -30,7 +30,8 @@ public class GuideController {
                     request.languages,
                     request.gtaLicenseNo,
                     request.ghanaCardNumber,
-                    request.companyName
+                    request.companyName,
+                    request.region
             ));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -106,6 +107,22 @@ public class GuideController {
     ) {
         try {
             return ResponseEntity.ok(guideService.requestPayout(id, request.amount, request.momoNumber));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{id}/payout-details")
+    public ResponseEntity<?> updatePayoutDetails(
+            @PathVariable Integer id,
+            @RequestBody UpdatePayoutDetailsRequest request
+    ) {
+        try {
+            return ResponseEntity.ok(guideService.updatePayoutDetails(
+                    id,
+                    request.payoutMomoNumber,
+                    request.payoutTelco
+            ));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

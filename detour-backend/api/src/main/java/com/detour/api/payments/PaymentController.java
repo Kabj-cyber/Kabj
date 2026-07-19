@@ -78,4 +78,10 @@ public class PaymentController {
         paymentService.handleWebhook("card", payload);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/webhooks/transfer")
+    public ResponseEntity<Void> transferWebhook(@RequestBody Map<String, Object> payload) {
+        paymentService.handleWebhook("transfer", payload);
+        return ResponseEntity.ok().build();
+    }
 }

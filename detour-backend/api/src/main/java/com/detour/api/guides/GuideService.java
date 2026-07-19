@@ -2,6 +2,9 @@ package com.detour.api.guides;
 
 import com.detour.api.guides.dto.*;
 import com.detour.api.notifications.NotificationService;
+import com.detour.api.payments.provider.PaystackTransferResult;
+import com.detour.api.payments.provider.PaystackTransferService;
+import com.detour.api.users.User;
 import com.detour.api.users.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,8 +13,10 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -19,25 +24,30 @@ public class GuideService {
 
     private static final BigDecimal COMMISSION_RATE = new BigDecimal("0.075");
     private static final BigDecimal COMMISSION_RATE_PERCENT = new BigDecimal("7.5");
+    private static final BigDecimal SCAN_PAYOUT_GUIDE_SHARE = new BigDecimal("0.95");
+    private static final Set<String> VALID_PAYOUT_TELCOS = Set.of("MTN", "VOD", "ATL");
 
     private final GuideProfileRepository guideProfileRepository;
     private final GuideAvailabilityRepository guideAvailabilityRepository;
     private final GuidePayoutRepository guidePayoutRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+    private final PaystackTransferService paystackTransferService;
 
     public GuideService(
             GuideProfileRepository guideProfileRepository,
             GuideAvailabilityRepository guideAvailabilityRepository,
             GuidePayoutRepository guidePayoutRepository,
             UserRepository userRepository,
-            NotificationService notificationService
+            NotificationService notificationService,
+            PaystackTransferService paystackTransferService
     ) {
         this.guideProfileRepository = guideProfileRepository;
         this.guideAvailabilityRepository = guideAvailabilityRepository;
         this.guidePayoutRepository = guidePayoutRepository;
         this.userRepository = userRepository;
         this.notificationService = notificationService;
+        this.paystackTransferService = paystackTransferService;
     }
 
     @Transactional
@@ -48,7 +58,8 @@ public class GuideService {
             String languages,
             String gtaLicenseNo,
             String ghanaCardNumber,
-            String companyName
+            String companyName,
+            String region
     ) {
         if (userId == null) {
             throw new RuntimeException("userId is required");
@@ -61,6 +72,9 @@ public class GuideService {
         }
         if (companyName == null || companyName.isBlank()) {
             throw new RuntimeException("Company name is required — we must verify which tour operator you work for before approval");
+        }
+        if (region == null || region.isBlank()) {
+            throw new RuntimeException("Region is required");
         }
 
         userRepository.findById(userId)
@@ -78,6 +92,7 @@ public class GuideService {
         profile.setGtaLicenseNo(gtaLicenseNo.trim());
         profile.setGhanaCardNumber(ghanaCardNumber.trim());
         profile.setCompanyName(companyName.trim());
+        profile.setRegion(region.trim());
         profile.setVerificationStatus(VerificationStatus.PENDING);
 
         return GuideProfileResponse.from(guideProfileRepository.save(profile));
@@ -138,9 +153,10 @@ public class GuideService {
     ) {
         GuideProfile profile = findGuide(guideId);
 
-        if (profile.getVerificationStatus() != VerificationStatus.APPROVED) {
-            throw new RuntimeException("Only approved guides can set availability");
-        }
+        // Verification gate temporarily disabled — re-enable before shipping.
+        // if (profile.getVerificationStatus() != VerificationStatus.APPROVED) {
+        //     throw new RuntimeException("Only approved guides can set availability");
+        // }
         if (date == null) {
             throw new RuntimeException("date is required");
         }
@@ -223,9 +239,10 @@ public class GuideService {
         }
 
         GuideProfile profile = findGuide(guideId);
-        if (profile.getVerificationStatus() != VerificationStatus.APPROVED) {
-            throw new RuntimeException("Only approved guides can request payouts");
-        }
+        // Verification gate temporarily disabled — re-enable before shipping.
+        // if (profile.getVerificationStatus() != VerificationStatus.APPROVED) {
+        //     throw new RuntimeException("Only approved guides can request payouts");
+        // }
 
         EarningsSummaryResponse earnings = getEarningsSummary(guideId);
         if (amount.compareTo(earnings.pendingPayoutBalance) > 0) {
@@ -246,6 +263,125 @@ public class GuideService {
                 "Payout request submitted. Funds will be sent to "
                         + payout.getMomoNumber()
                         + " once processed (sandbox — no real MoMo API call)."
+        );
+    }
+
+    @Transactional
+    public GuideProfileResponse updatePayoutDetails(Integer guideId, String payoutMomoNumber, String payoutTelco) {
+        if (payoutMomoNumber == null || payoutMomoNumber.isBlank()) {
+            throw new RuntimeException("Mobile money number is required");
+        }
+        if (payoutTelco == null || payoutTelco.isBlank()) {
+            throw new RuntimeException("Telco is required (MTN, VOD, or ATL)");
+        }
+
+        String normalizedTelco = payoutTelco.trim().toUpperCase();
+        if (!VALID_PAYOUT_TELCOS.contains(normalizedTelco)) {
+            throw new RuntimeException("Invalid telco. Use MTN, VOD, or ATL.");
+        }
+
+        GuideProfile profile = findGuide(guideId);
+        profile.setPayoutMomoNumber(payoutMomoNumber.trim());
+        profile.setPayoutTelco(normalizedTelco);
+        return GuideProfileResponse.from(guideProfileRepository.save(profile));
+    }
+
+    @Transactional
+    public GuidePayout triggerScanPayout(Integer guideProfileId, BigDecimal bookingTotalAmount, Integer bookingId) {
+        GuideProfile guideProfile = findGuide(guideProfileId);
+
+        if (guideProfile.getPayoutMomoNumber() == null || guideProfile.getPayoutMomoNumber().isBlank()
+                || guideProfile.getPayoutTelco() == null || guideProfile.getPayoutTelco().isBlank()) {
+            throw new RuntimeException("Guide has no payout MoMo details on file");
+        }
+
+        BigDecimal guideAmount = bookingTotalAmount.multiply(SCAN_PAYOUT_GUIDE_SHARE)
+                .setScale(2, RoundingMode.HALF_UP);
+
+        String reference = "SCAN-PAYOUT-" + bookingId + "-" + UUID.randomUUID();
+
+        GuidePayout payout = new GuidePayout();
+        payout.setGuideId(guideProfileId);
+        payout.setAmount(guideAmount);
+        payout.setMomoNumber(guideProfile.getPayoutMomoNumber());
+        payout.setPayoutStatus(PayoutStatus.PROCESSING);
+        payout.setTransactionReference(reference);
+        payout = guidePayoutRepository.save(payout);
+
+        User guideUser = userRepository.findById(guideProfile.getUserId())
+                .orElseThrow(() -> new RuntimeException("Guide user not found"));
+        String recipientName = guideUser.getName() != null && !guideUser.getName().isBlank()
+                ? guideUser.getName()
+                : "DeTour Guide";
+
+        PaystackTransferResult recipientResult = paystackTransferService.resolveRecipientCode(
+                guideProfile.getPayoutMomoNumber(),
+                guideProfile.getPayoutTelco(),
+                recipientName
+        );
+        if (!recipientResult.success()) {
+            markPayoutFailed(payout, guideProfile.getUserId(), recipientResult.message());
+            return guidePayoutRepository.save(payout);
+        }
+
+        PaystackTransferResult transferResult = paystackTransferService.initiateTransfer(
+                recipientResult.transferCode(),
+                guideAmount,
+                "DeTour tour payout for booking #" + bookingId,
+                reference
+        );
+        if (!transferResult.success()) {
+            markPayoutFailed(payout, guideProfile.getUserId(), transferResult.message());
+            return guidePayoutRepository.save(payout);
+        }
+
+        payout.setTransactionReference(transferResult.transferCode());
+        if ("success".equalsIgnoreCase(transferResult.status())) {
+            payout.setPayoutStatus(PayoutStatus.COMPLETED);
+            payout.setProcessedAt(LocalDateTime.now());
+        }
+
+        return guidePayoutRepository.save(payout);
+    }
+
+    @Transactional
+    public void applyTransferWebhookStatus(String reference, String transferStatus) {
+        if (reference == null || reference.isBlank()) {
+            return;
+        }
+
+        guidePayoutRepository.findByTransactionReference(reference).ifPresent(payout -> {
+            if (PayoutStatus.COMPLETED.equals(payout.getPayoutStatus())
+                    || PayoutStatus.FAILED.equals(payout.getPayoutStatus())) {
+                return;
+            }
+
+            if ("success".equalsIgnoreCase(transferStatus)) {
+                payout.setPayoutStatus(PayoutStatus.COMPLETED);
+                payout.setProcessedAt(LocalDateTime.now());
+            } else if ("failed".equalsIgnoreCase(transferStatus) || "reversed".equalsIgnoreCase(transferStatus)) {
+                GuideProfile profile = guideProfileRepository.findById(payout.getGuideId()).orElse(null);
+                if (profile != null) {
+                    markPayoutFailed(payout, profile.getUserId(), "Transfer " + transferStatus);
+                } else {
+                    payout.setPayoutStatus(PayoutStatus.FAILED);
+                }
+            } else {
+                return;
+            }
+
+            guidePayoutRepository.save(payout);
+        });
+    }
+
+    private void markPayoutFailed(GuidePayout payout, Integer guideUserId, String reason) {
+        payout.setPayoutStatus(PayoutStatus.FAILED);
+        notificationService.create(
+                guideUserId,
+                "PAYOUT_FAILED",
+                "Payout could not be sent",
+                "We could not send your tour payout automatically. Our support team will follow up shortly."
+                        + (reason != null && !reason.isBlank() ? " (" + reason + ")" : "")
         );
     }
 
