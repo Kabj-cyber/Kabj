@@ -14,6 +14,7 @@ public class GuideProfileResponse {
     public String gtaLicenseNo;
     public String ghanaCardNumber;
     public String companyName;
+    public String region;
     public VerificationStatus verificationStatus;
     public BigDecimal avgRating;
     public BigDecimal baseRatePerHour;
@@ -29,6 +30,7 @@ public class GuideProfileResponse {
         r.gtaLicenseNo = profile.getGtaLicenseNo();
         r.ghanaCardNumber = profile.getGhanaCardNumber();
         r.companyName = profile.getCompanyName();
+        r.region = profile.getRegion();
         r.verificationStatus = profile.getVerificationStatus();
         r.avgRating = profile.getAvgRating();
         r.baseRatePerHour = profile.getBaseRatePerHour();

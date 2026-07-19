@@ -33,6 +33,9 @@ public class GuideProfile {
     @Column(name = "company_name", length = 150)
     private String companyName;
 
+    @Column(length = 50)
+    private String region;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "verification_status", nullable = false, length = 20)
     private VerificationStatus verificationStatus = VerificationStatus.PENDING;
@@ -69,6 +72,9 @@ public class GuideProfile {
 
     public String getCompanyName() { return companyName; }
     public void setCompanyName(String companyName) { this.companyName = companyName; }
+
+    public String getRegion() { return region; }
+    public void setRegion(String region) { this.region = region; }
 
     public VerificationStatus getVerificationStatus() { return verificationStatus; }
     public void setVerificationStatus(VerificationStatus verificationStatus) { this.verificationStatus = verificationStatus; }

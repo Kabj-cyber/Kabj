@@ -8,4 +8,5 @@ public class GuideOnboardingRequest {
     public String gtaLicenseNo;
     public String ghanaCardNumber;
     public String companyName;
+    public String region;
 }

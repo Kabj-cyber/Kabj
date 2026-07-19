@@ -30,7 +30,8 @@ public class GuideController {
                     request.languages,
                     request.gtaLicenseNo,
                     request.ghanaCardNumber,
-                    request.companyName
+                    request.companyName,
+                    request.region
             ));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

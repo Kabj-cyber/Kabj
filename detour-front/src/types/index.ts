@@ -176,6 +176,7 @@ export interface GuideProfile {
   gtaLicenseNo: string;
   ghanaCardNumber: string;
   companyName: string;
+  region?: string;
   verificationStatus: VerificationStatus;
   avgRating?: number;
   baseRatePerHour?: number;
@@ -190,6 +191,7 @@ export interface GuideOnboardingRequest {
   gtaLicenseNo: string;
   ghanaCardNumber: string;
   companyName: string;
+  region: string;
 }
 
 export interface GuideAvailability {

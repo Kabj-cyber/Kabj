@@ -36,6 +36,18 @@ public class Booking {
     @Column(name = "sync_status", length = 20)
     private String syncStatus = "SYNCED";
 
+    @Column(name = "guide_profile_id")
+    private Integer guideProfileId;
+
+    @Column(name = "execution_status", length = 20, nullable = false)
+    private String executionStatus = "PENDING_EXECUTION";
+
+    @Column(name = "qr_token_issued_at")
+    private LocalDateTime qrTokenIssuedAt;
+
+    @Column(name = "completed_at")
+    private LocalDateTime completedAt;
+
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -61,6 +73,18 @@ public class Booking {
 
     public String getSyncStatus() { return syncStatus; }
     public void setSyncStatus(String syncStatus) { this.syncStatus = syncStatus; }
+
+    public Integer getGuideProfileId() { return guideProfileId; }
+    public void setGuideProfileId(Integer guideProfileId) { this.guideProfileId = guideProfileId; }
+
+    public String getExecutionStatus() { return executionStatus; }
+    public void setExecutionStatus(String executionStatus) { this.executionStatus = executionStatus; }
+
+    public LocalDateTime getQrTokenIssuedAt() { return qrTokenIssuedAt; }
+    public void setQrTokenIssuedAt(LocalDateTime qrTokenIssuedAt) { this.qrTokenIssuedAt = qrTokenIssuedAt; }
+
+    public LocalDateTime getCompletedAt() { return completedAt; }
+    public void setCompletedAt(LocalDateTime completedAt) { this.completedAt = completedAt; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

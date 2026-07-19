@@ -3,6 +3,7 @@ package com.detour.api.bookings;
 
 
 import com.detour.api.bookings.dto.BookingRequest;
+import com.detour.api.bookings.dto.QrTokenResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,5 +36,18 @@ public class BookingController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Booking>> getUserBookings(@PathVariable Integer userId) {
         return ResponseEntity.ok(bookingService.getBookingsForUser(userId));
+    }
+
+    @GetMapping("/{id}/qr-token")
+    public ResponseEntity<?> getQrToken(
+            @PathVariable Integer id,
+            @RequestParam Integer touristId
+    ) {
+        try {
+            String token = bookingService.getQrToken(id, touristId);
+            return ResponseEntity.ok(new QrTokenResponse(token, 900));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }
