@@ -33,7 +33,10 @@ public class BookingService {
     private final GuideProfileRepository guideProfileRepository;
     private final NotificationService notificationService;
     private final QrTokenService qrTokenService;
+<<<<<<< HEAD
     private final GuideService guideService;
+=======
+>>>>>>> b9e8f34c078d61236ce5a4f9cab9e9d4c260257b
 
     @Autowired
     public BookingService(BookingRepository bookingRepository,
@@ -41,15 +44,22 @@ public class BookingService {
                           AttractionRepository attractionRepository,
                           GuideProfileRepository guideProfileRepository,
                           NotificationService notificationService,
+<<<<<<< HEAD
                           QrTokenService qrTokenService,
                           GuideService guideService) {
+=======
+                          QrTokenService qrTokenService) {
+>>>>>>> b9e8f34c078d61236ce5a4f9cab9e9d4c260257b
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
         this.attractionRepository = attractionRepository;
         this.guideProfileRepository = guideProfileRepository;
         this.notificationService = notificationService;
         this.qrTokenService = qrTokenService;
+<<<<<<< HEAD
         this.guideService = guideService;
+=======
+>>>>>>> b9e8f34c078d61236ce5a4f9cab9e9d4c260257b
     }
 
     public Booking createBooking(BookingRequest request) {
@@ -141,6 +151,7 @@ public class BookingService {
         bookingRepository.save(booking);
         return token;
     }
+<<<<<<< HEAD
 
     public Booking completeBookingByScan(String token, Integer scanningGuideUserId) {
         Integer bookingId = qrTokenService.verifyToken(token);
@@ -181,4 +192,6 @@ public class BookingService {
 
         return savedBooking;
     }
+=======
+>>>>>>> b9e8f34c078d61236ce5a4f9cab9e9d4c260257b
 }

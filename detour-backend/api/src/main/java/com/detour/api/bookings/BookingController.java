@@ -51,6 +51,7 @@ public class BookingController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+<<<<<<< HEAD
 
     @PostMapping("/scan")
     public ResponseEntity<?> completeBookingByScan(@RequestBody ScanBookingRequest request) {
@@ -61,4 +62,6 @@ public class BookingController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+=======
+>>>>>>> b9e8f34c078d61236ce5a4f9cab9e9d4c260257b
 }
