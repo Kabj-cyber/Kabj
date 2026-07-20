@@ -1,14 +1,16 @@
 {
-    "configurations": [
-        {
-            "type": "java",
-            "name": "Spring Boot-ApiApplication<api>",
-            "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "mainClass": "com.detour.api.ApiApplication",
-            "projectName": "api",
-            "args": "",
-            "envFile": "${workspaceFolder}/.env"
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "DetourApiApplication",
+      "request": "launch",
+      "mainClass": "com.detour.api.ApiApplication",
+      "projectName": "api",
+      "env": {
+        "PAYSTACK_SECRET_KEY": "sk_test_f288757b06952bae75129d5f909ddfbe8d84f22e",
+        "PAYSTACK_PUBLIC_KEY": "pk_test_133e2ab1d8c5cc2793d01f1870db6049e18423d7"
+      }
+    }
+  ]
 }

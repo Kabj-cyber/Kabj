@@ -3,6 +3,7 @@ package com.detour.api.bookings;
 
 
 import com.detour.api.bookings.dto.BookingRequest;
+import com.detour.api.bookings.dto.BookingResponse;
 import com.detour.api.bookings.dto.QrTokenResponse;
 import com.detour.api.bookings.dto.ScanBookingRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ public class BookingController {
 
     // Endpoint: GET http://localhost:8080/api/bookings/user/1
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Booking>> getUserBookings(@PathVariable Integer userId) {
+    public ResponseEntity<List<BookingResponse>> getUserBookings(@PathVariable Integer userId) {
         return ResponseEntity.ok(bookingService.getBookingsForUser(userId));
     }
 

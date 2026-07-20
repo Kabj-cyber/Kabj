@@ -3,7 +3,9 @@ package com.detour.api.bookings;
 
 import com.detour.api.attractions.Attraction;
 import com.detour.api.attractions.AttractionRepository;
+import com.detour.api.bookings.dto.BookingGuideSummary;
 import com.detour.api.bookings.dto.BookingRequest;
+import com.detour.api.bookings.dto.BookingResponse;
 import com.detour.api.bookings.qr.QrTokenService;
 import com.detour.api.guides.GuideProfile;
 import com.detour.api.guides.GuideProfileRepository;
@@ -117,8 +119,20 @@ public class BookingService {
         return savedBooking;
     }
 
-    public List<Booking> getBookingsForUser(Integer userId) {
-        return bookingRepository.findByTouristId(userId);
+    public List<BookingResponse> getBookingsForUser(Integer userId) {
+        return bookingRepository.findByTouristId(userId).stream()
+                .map(booking -> BookingResponse.from(booking, resolveGuideSummary(booking)))
+                .toList();
+    }
+
+    private BookingGuideSummary resolveGuideSummary(Booking booking) {
+        if (booking.getGuideProfileId() == null) {
+            return null;
+        }
+        return guideProfileRepository.findById(booking.getGuideProfileId())
+                .flatMap(profile -> userRepository.findById(profile.getUserId())
+                        .map(guideUser -> BookingGuideSummary.from(profile, guideUser)))
+                .orElse(null);
     }
 
     public String getQrToken(Integer bookingId, Integer requestingTouristId) {

@@ -6,6 +6,8 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
+  Linking,
+  Platform,
   RefreshControl,
   StyleSheet,
   Text,
@@ -17,6 +19,22 @@ import { useAuth } from "../context/AuthContext";
 import { RootStackParamList } from "../navigation/types";
 import { colors, radius } from "../theme";
 import { Booking } from "../types";
+
+function callGuide(phoneNumber: string) {
+  Linking.openURL(`tel:${phoneNumber.replace(/\s/g, "")}`);
+}
+
+function openMeetupLocation(booking: Booking) {
+  const { latitude, longitude, title } = booking.attraction;
+  const label = encodeURIComponent(title);
+  const url =
+    Platform.OS === "ios"
+      ? `maps:0,0?q=${label}@${latitude},${longitude}`
+      : `geo:${latitude},${longitude}?q=${latitude},${longitude}(${label})`;
+  Linking.openURL(url).catch(() => {
+    Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`);
+  });
+}
 
 export default function BookingsScreen() {
   const { user } = useAuth();
@@ -95,58 +113,97 @@ export default function BookingsScreen() {
           }
           renderItem={({ item }) => (
             <View style={styles.card}>
-              <View style={styles.thumb}>
-                <Ionicons name="image-outline" size={22} color={colors.textMuted} />
+              <View style={styles.cardTop}>
+                <View style={styles.thumb}>
+                  <Ionicons name="image-outline" size={22} color={colors.textMuted} />
+                </View>
+                <View style={{ flex: 1, marginLeft: 12 }}>
+                  <Text style={styles.title}>{item.attraction?.title}</Text>
+                  <Text style={styles.sub}>
+                    {new Date(item.bookingDate).toLocaleDateString()} ·{" "}
+                    {new Date(item.bookingDate).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </Text>
+                  <Text style={styles.amount}>GHS {Number(item.totalAmount).toFixed(2)}</Text>
+                  {item.paymentStatus !== "PAID" ? (
+                    <TouchableOpacity
+                      style={styles.payBtn}
+                      onPress={() => handleRetryPayment(item)}
+                      disabled={payingId === item.id}
+                    >
+                      {payingId === item.id ? (
+                        <ActivityIndicator size="small" color="#fff" />
+                      ) : (
+                        <>
+                          <Ionicons name="wallet-outline" size={14} color="#fff" />
+                          <Text style={styles.payBtnText}>Pay Now</Text>
+                        </>
+                      )}
+                    </TouchableOpacity>
+                  ) : (
+                    <TouchableOpacity
+                      style={styles.qrBtn}
+                      onPress={() =>
+                        navigation.navigate("BookingQr", {
+                          bookingId: item.id,
+                          attractionTitle: item.attraction?.title || "Tour booking",
+                          bookingDate: item.bookingDate,
+                          totalAmount: item.totalAmount,
+                        })
+                      }
+                    >
+                      <Ionicons name="qr-code-outline" size={14} color="#fff" />
+                      <Text style={styles.payBtnText}>Show QR</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+                <View
+                  style={[
+                    styles.statusPill,
+                    item.paymentStatus === "PAID" ? styles.statusPaid : styles.statusPending,
+                  ]}
+                >
+                  <Text style={styles.statusText}>{item.paymentStatus}</Text>
+                </View>
               </View>
-              <View style={{ flex: 1, marginLeft: 12 }}>
-                <Text style={styles.title}>{item.attraction?.title}</Text>
-                <Text style={styles.sub}>
-                  {new Date(item.bookingDate).toLocaleDateString()} ·{" "}
-                  {new Date(item.bookingDate).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </Text>
-                <Text style={styles.amount}>GHS {Number(item.totalAmount).toFixed(2)}</Text>
-                {item.paymentStatus !== "PAID" ? (
-                  <TouchableOpacity
-                    style={styles.payBtn}
-                    onPress={() => handleRetryPayment(item)}
-                    disabled={payingId === item.id}
-                  >
-                    {payingId === item.id ? (
-                      <ActivityIndicator size="small" color="#fff" />
-                    ) : (
-                      <>
-                        <Ionicons name="wallet-outline" size={14} color="#fff" />
-                        <Text style={styles.payBtnText}>Pay Now</Text>
-                      </>
-                    )}
-                  </TouchableOpacity>
+
+              <View style={styles.meetingBlock}>
+                {item.guide ? (
+                  <>
+                    <View style={styles.meetingRow}>
+                      <Ionicons name="person-circle-outline" size={16} color={colors.primary} />
+                      <Text style={styles.meetingText}>
+                        Your guide: <Text style={styles.meetingBold}>{item.guide.name}</Text>
+                      </Text>
+                    </View>
+                    {item.guide.phoneNumber ? (
+                      <TouchableOpacity
+                        style={styles.meetingRow}
+                        onPress={() => callGuide(item.guide!.phoneNumber!)}
+                      >
+                        <Ionicons name="call-outline" size={16} color={colors.primary} />
+                        <Text style={[styles.meetingText, styles.meetingLink]}>
+                          {item.guide.phoneNumber}
+                        </Text>
+                      </TouchableOpacity>
+                    ) : null}
+                  </>
                 ) : (
-                  <TouchableOpacity
-                    style={styles.qrBtn}
-                    onPress={() =>
-                      navigation.navigate("BookingQr", {
-                        bookingId: item.id,
-                        attractionTitle: item.attraction?.title || "Tour booking",
-                        bookingDate: item.bookingDate,
-                        totalAmount: item.totalAmount,
-                      })
-                    }
-                  >
-                    <Ionicons name="qr-code-outline" size={14} color="#fff" />
-                    <Text style={styles.payBtnText}>Show QR</Text>
-                  </TouchableOpacity>
+                  <View style={styles.meetingRow}>
+                    <Ionicons name="person-circle-outline" size={16} color={colors.textMuted} />
+                    <Text style={styles.meetingText}>Matching you with a guide…</Text>
+                  </View>
                 )}
-              </View>
-              <View
-                style={[
-                  styles.statusPill,
-                  item.paymentStatus === "PAID" ? styles.statusPaid : styles.statusPending,
-                ]}
-              >
-                <Text style={styles.statusText}>{item.paymentStatus}</Text>
+                {item.attraction ? (
+                  <TouchableOpacity style={styles.meetingRow} onPress={() => openMeetupLocation(item)}>
+                    <Ionicons name="location-outline" size={16} color={colors.primary} />
+                    <Text style={[styles.meetingText, styles.meetingLink]} numberOfLines={1}>
+                      {item.attraction.title} · {item.attraction.region}
+                    </Text>
+                  </TouchableOpacity>
+                ) : null}
               </View>
             </View>
           )}
@@ -161,8 +218,6 @@ const styles = StyleSheet.create({
   header: { fontSize: 20, fontWeight: "800", color: colors.text, paddingHorizontal: 20, marginBottom: 14 },
   list: { padding: 20 },
   card: {
-    flexDirection: "row",
-    alignItems: "center",
     backgroundColor: colors.card,
     borderRadius: radius.md,
     padding: 12,
@@ -170,6 +225,18 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
+  cardTop: { flexDirection: "row", alignItems: "center" },
+  meetingBlock: {
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    gap: 6,
+  },
+  meetingRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  meetingText: { fontSize: 12.5, color: colors.text, flexShrink: 1 },
+  meetingBold: { fontWeight: "700" },
+  meetingLink: { color: colors.primary, fontWeight: "600" },
   thumb: {
     width: 50,
     height: 50,

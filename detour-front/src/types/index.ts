@@ -59,6 +59,15 @@ export interface FavoriteToggleResponse {
   favorited: boolean;
 }
 
+/** Contact/summary info for the guide assigned to a booking, if one has been matched yet. */
+export interface BookingGuide {
+  id: number;
+  name: string;
+  phoneNumber?: string;
+  specialty?: string;
+  avgRating?: number;
+}
+
 export interface Booking {
   id: number;
   tourist: User;
@@ -68,6 +77,8 @@ export interface Booking {
   paymentStatus: string;
   syncStatus: string;
   createdAt?: string;
+  /** Present once a guide has been matched to this booking; absent while matching is in progress. */
+  guide?: BookingGuide | null;
 }
 
 export interface RegistrationRequest {
