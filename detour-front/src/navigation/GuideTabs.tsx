@@ -4,6 +4,7 @@ import React from "react";
 import { GuideTabsParamList } from "./types";
 import GuideDashboardScreen from "../screens/guide/GuideDashboardScreen";
 import GuideCalendarScreen from "../screens/guide/GuideCalendarScreen";
+import GuideScanScreen from "../screens/guide/GuideScanScreen";
 import GuidePayoutsScreen from "../screens/guide/GuidePayoutsScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import { colors } from "../theme";
@@ -13,6 +14,7 @@ const Tab = createBottomTabNavigator<GuideTabsParamList>();
 const ICONS: Record<keyof GuideTabsParamList, keyof typeof Ionicons.glyphMap> = {
   Dashboard: "grid",
   Calendar: "calendar",
+  Scan: "qr-code",
   Payouts: "wallet",
   Profile: "person",
 };
@@ -35,6 +37,7 @@ export default function GuideTabs() {
     >
       <Tab.Screen name="Dashboard" component={GuideDashboardScreen} />
       <Tab.Screen name="Calendar" component={GuideCalendarScreen} />
+      <Tab.Screen name="Scan" component={GuideScanScreen} options={{ title: "Scan" }} />
       <Tab.Screen name="Payouts" component={GuidePayoutsScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>

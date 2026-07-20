@@ -14,6 +14,7 @@ import MainTabs from "./MainTabs";
 import GuideTabs from "./GuideTabs";
 import GuideOnboardingScreen from "../screens/guide/GuideOnboardingScreen";
 import GuideBookingDetailScreen from "../screens/guide/GuideBookingDetailScreen";
+import BookingQrScreen from "../screens/BookingQrScreen";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -30,6 +31,7 @@ export default function RootNavigator() {
       <Stack.Screen name="AttractionDetail" component={AttractionDetailScreen} />
       <Stack.Screen name="BookTour" component={BookTourScreen} />
       <Stack.Screen name="Payment" component={PaymentScreen} />
+      <Stack.Screen name="BookingQr" component={BookingQrScreen} />
       <Stack.Screen name="EmergencyContacts" component={EmergencyContactsScreen} />
       <Stack.Screen name="SOSRecording" component={SOSRecordingScreen} />
       <Stack.Screen name="Notifications" component={NotificationsScreen} />

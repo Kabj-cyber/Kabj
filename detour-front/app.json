@@ -9,6 +9,7 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
+        "NSCameraUsageDescription": "DeTour uses your camera so guides can scan tourist check-in QR codes.",
         "NSMicrophoneUsageDescription": "DeTour records audio during SOS emergencies to send to local authorities.",
         "NSLocationWhenInUseUsageDescription": "DeTour uses your location during SOS emergencies to share your GPS coordinates with local authorities."
       }
@@ -27,6 +28,7 @@
       },
       "predictiveBackGestureEnabled": false,
       "permissions": [
+        "CAMERA",
         "RECORD_AUDIO",
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION"
@@ -46,6 +48,14 @@
         "expo-av",
         {
           "microphonePermission": "DeTour records audio during SOS emergencies to send to local authorities."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "DeTour uses your camera so guides can scan tourist check-in QR codes.",
+          "barcodeScannerEnabled": true,
+          "recordAudioAndroid": false
         }
       ]
     ]

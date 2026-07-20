@@ -123,7 +123,22 @@ export default function BookingsScreen() {
                       </>
                     )}
                   </TouchableOpacity>
-                ) : null}
+                ) : (
+                  <TouchableOpacity
+                    style={styles.qrBtn}
+                    onPress={() =>
+                      navigation.navigate("BookingQr", {
+                        bookingId: item.id,
+                        attractionTitle: item.attraction?.title || "Tour booking",
+                        bookingDate: item.bookingDate,
+                        totalAmount: item.totalAmount,
+                      })
+                    }
+                  >
+                    <Ionicons name="qr-code-outline" size={14} color="#fff" />
+                    <Text style={styles.payBtnText}>Show QR</Text>
+                  </TouchableOpacity>
+                )}
               </View>
               <View
                 style={[
@@ -171,6 +186,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 6,
     backgroundColor: colors.primary,
+    alignSelf: "flex-start",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: radius.pill,
+    marginTop: 8,
+  },
+  qrBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: colors.primaryDark,
     alignSelf: "flex-start",
     paddingHorizontal: 12,
     paddingVertical: 6,

@@ -1,5 +1,5 @@
 import { NavigatorScreenParams } from "@react-navigation/native";
-import { Attraction, GuideBookingDetailParams } from "../types";
+import { Attraction, BookingQrParams, GuideBookingDetailParams } from "../types";
 
 export type RootStackParamList = {
   Welcome: undefined;
@@ -12,6 +12,7 @@ export type RootStackParamList = {
   AttractionDetail: { attraction: Attraction };
   BookTour: { attraction: Attraction };
   Payment: { paymentId: number; attractionTitle: string };
+  BookingQr: BookingQrParams;
   EmergencyContacts: undefined;
   SOSRecording: undefined;
   Notifications: undefined;
@@ -29,6 +30,7 @@ export type MainTabsParamList = {
 export type GuideTabsParamList = {
   Dashboard: undefined;
   Calendar: undefined;
+  Scan: undefined;
   Payouts: undefined;
   Profile: undefined;
 };

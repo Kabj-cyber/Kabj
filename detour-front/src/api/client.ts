@@ -4,6 +4,7 @@ import {
   Booking,
   BookingRequest,
   EmergencyContact,
+  QrTokenResponse,
   EmergencyContactRequest,
   Facility,
   FacilityCategory,
@@ -114,6 +115,18 @@ export const api = {
 
   getUserBookings: (userId: number) =>
     fetch(`${BASE_URL}/api/bookings/user/${userId}`).then((r) => handle<Booking[]>(r)),
+
+  getBookingQrToken: (bookingId: number, touristId: number) =>
+    fetch(
+      `${BASE_URL}/api/bookings/${bookingId}/qr-token?touristId=${touristId}`
+    ).then((r) => handle<QrTokenResponse>(r)),
+
+  scanBooking: (token: string, guideUserId: number) =>
+    fetch(`${BASE_URL}/api/bookings/scan`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token, guideUserId }),
+    }).then((r) => handle<Booking>(r)),
 
   // --- Payments (PaymentController) ---
   initiatePayment: (body: InitiatePaymentRequest) =>

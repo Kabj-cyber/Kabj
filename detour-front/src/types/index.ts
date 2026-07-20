@@ -89,6 +89,19 @@ export interface BookingRequest {
   totalAmount: number;
 }
 
+export interface QrTokenResponse {
+  token: string;
+  expiresInSeconds: number;
+}
+
+/** Params for tourist booking QR check-in screen. */
+export interface BookingQrParams {
+  bookingId: number;
+  attractionTitle: string;
+  bookingDate: string;
+  totalAmount: number;
+}
+
 export type PaymentMethodType = "MTN_MOMO" | "VODAFONE_CASH" | "CARD";
 
 export type PaymentStatusType = "PENDING" | "PROCESSING" | "SUCCESS" | "FAILED";
