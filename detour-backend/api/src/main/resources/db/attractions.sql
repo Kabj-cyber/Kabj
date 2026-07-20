@@ -43,3 +43,38 @@ WHERE NOT EXISTS (SELECT 1 FROM attractions WHERE title = 'Kwame Nkrumah Memoria
 INSERT INTO attractions (title, description, region, category, latitude, longitude, base_price, eco_score, popularity_count)
 SELECT 'Manhyia Palace Museum', 'The historical seat of the Asantehene, rich with Ashanti cultural history.', 'Ashanti', 'Historical', 6.705600, -1.615300, 40.00, 0.80, 1150
 WHERE NOT EXISTS (SELECT 1 FROM attractions WHERE title = 'Manhyia Palace Museum');
+
+-- Amenities & opening hours (sourced from official/tourism-board listings, added here
+-- because they were previously missing from the Attraction entity entirely).
+ALTER TABLE attractions ADD COLUMN IF NOT EXISTS amenities TEXT;
+ALTER TABLE attractions ADD COLUMN IF NOT EXISTS opening_hours VARCHAR(150);
+
+UPDATE attractions
+SET
+    opening_hours = 'Daily, 8:00 AM – 4:30 PM (last canopy walk entry ~4:00 PM)',
+    amenities = 'Canopy walkway visitor center, guided rainforest nature trails, on-site restaurant, gift shop, restrooms, parking, and treehouse/overnight camping'
+WHERE title = 'Kakum National Park';
+
+UPDATE attractions
+SET
+    opening_hours = 'Daily, 9:00 AM – 4:30 PM',
+    amenities = 'West African Historical Museum, guided 45-minute dungeon tours, gift shop with local arts and crafts, restrooms, on-site parking'
+WHERE title = 'Cape Coast Castle';
+
+UPDATE attractions
+SET
+    opening_hours = 'Gates open daily; guided safaris run 7:00–9:00 AM, 3:30–5:30 PM, and 7:00–9:00 PM (night safari requires advance booking)',
+    amenities = 'Mole Motel overlooking the waterhole, walking and jeep safaris led by armed park rangers, on-site restaurant, campsite, visitor center for registration'
+WHERE title = 'Mole National Park';
+
+UPDATE attractions
+SET
+    opening_hours = 'Mon–Sat 9:00 AM – 7:00 PM, Sun 10:00 AM – 7:00 PM',
+    amenities = 'Air-conditioned mausoleum and museum, gift shop, fountains and landscaped gardens, restrooms, on-site guides, parking'
+WHERE title = 'Kwame Nkrumah Memorial Park';
+
+UPDATE attractions
+SET
+    opening_hours = 'Mon–Sat, 9:00 AM – 5:00 PM (closed Sundays)',
+    amenities = 'Guided tours with introductory video, wax-figure and royal regalia exhibits, souvenir/gift shop, restrooms; nearby dining options (no on-site restaurant)'
+WHERE title = 'Manhyia Palace Museum';

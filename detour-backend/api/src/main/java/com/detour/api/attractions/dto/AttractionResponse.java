@@ -18,6 +18,8 @@ public class AttractionResponse {
     public String imageUrl;
     public BigDecimal averageRating;
     public Integer reviewCount;
+    public String amenities;
+    public String openingHours;
     public LocalDateTime createdAt;
     public Double distanceKm;
     public boolean isFavorited;
@@ -37,6 +39,8 @@ public class AttractionResponse {
         r.imageUrl = attraction.getImageUrl();
         r.averageRating = attraction.getAverageRating();
         r.reviewCount = attraction.getReviewCount();
+        r.amenities = attraction.getAmenities();
+        r.openingHours = attraction.getOpeningHours();
         r.createdAt = attraction.getCreatedAt();
         r.distanceKm = distanceKm;
         r.isFavorited = isFavorited;

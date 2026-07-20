@@ -64,6 +64,12 @@ export default function AttractionDetailScreen({ route, navigation }: Props) {
           {attraction.ecoScore != null && (
             <InfoItem icon="leaf-outline" label="Eco Score" value={`${attraction.ecoScore} / 5`} />
           )}
+          {attraction.openingHours && (
+            <InfoItem icon="time-outline" label="Opening Hours" value={attraction.openingHours} />
+          )}
+          {attraction.distanceKm != null && (
+            <InfoItem icon="navigate-outline" label="Distance" value={`${Number(attraction.distanceKm).toFixed(1)} km away`} />
+          )}
           <InfoItem
             icon="location-outline"
             label="Coordinates"
@@ -76,10 +82,12 @@ export default function AttractionDetailScreen({ route, navigation }: Props) {
           {attraction.description || "No description provided yet for this attraction."}
         </Text>
 
-        <Text style={styles.note}>
-          Note: amenities, opening hours, distance, and photos shown in the original design aren't
-          part of the Attraction entity yet — add those columns to enable them here.
-        </Text>
+        {attraction.amenities && (
+          <>
+            <Text style={styles.sectionTitle}>Amenities</Text>
+            <Text style={styles.description}>{attraction.amenities}</Text>
+          </>
+        )}
       </ScrollView>
 
       <View style={styles.footer}>
@@ -145,13 +153,6 @@ const styles = StyleSheet.create({
   infoValue: { fontSize: 14, fontWeight: "600", color: colors.text },
   sectionTitle: { fontSize: 16, fontWeight: "700", color: colors.text, marginTop: 22, marginBottom: 8 },
   description: { fontSize: 14, color: colors.textMuted, lineHeight: 21 },
-  note: {
-    fontSize: 12,
-    color: colors.warning,
-    marginTop: 18,
-    fontStyle: "italic",
-    lineHeight: 17,
-  },
   footer: {
     padding: 20,
     backgroundColor: colors.card,

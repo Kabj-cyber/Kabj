@@ -1,7 +1,7 @@
 // These types map 1:1 to your Spring Boot entities.
-// NOTE: fields like guide, time slot, status, photos, amenities, hours, distance
-// do NOT exist on the backend yet (see Attraction.java / Booking.java).
-// They are intentionally left out here rather than faked.
+// NOTE: fields like time slot and status do NOT exist on the backend yet
+// (see Booking.java). They are intentionally left out here rather than faked.
+// distanceKm is computed server-side from lat/lng at read time, not stored.
 
 export type FacilityCategory =
   | "HOTEL"
@@ -52,6 +52,8 @@ export interface Attraction {
   reviewCount?: number;
   distanceKm?: number;
   isFavorited?: boolean;
+  amenities?: string;
+  openingHours?: string;
   createdAt?: string;
 }
 

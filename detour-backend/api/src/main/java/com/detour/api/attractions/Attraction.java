@@ -48,6 +48,12 @@ public class Attraction {
     @Column(name = "review_count")
     private Integer reviewCount;
 
+    @Column(columnDefinition = "TEXT")
+    private String amenities;
+
+    @Column(name = "opening_hours", length = 150)
+    private String openingHours;
+
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -92,6 +98,12 @@ public class Attraction {
 
     public Integer getReviewCount() { return reviewCount; }
     public void setReviewCount(Integer reviewCount) { this.reviewCount = reviewCount; }
+
+    public String getAmenities() { return amenities; }
+    public void setAmenities(String amenities) { this.amenities = amenities; }
+
+    public String getOpeningHours() { return openingHours; }
+    public void setOpeningHours(String openingHours) { this.openingHours = openingHours; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
